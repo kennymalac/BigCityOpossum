@@ -30,11 +30,13 @@ type
     background: Sprite
     boundary: Boundary
     soundRegistry: SoundRegistry
-    # gameHud: GameHud
+
+    # Side scrolling - if the game is following the charcter or not
+    sideScrolling: bool    # gameHud: GameHud
 
 proc newStage1*(window: RenderWindow): Stage1 =
   let boundary: Boundary = (cint(300), cint(0), cint(0), cint(0))
-  result = Stage1(boundary: boundary, isGameOver: false)
+  result = Stage1(boundary: boundary, isGameOver: false, sideScrolling: true)
 
   initScene(
     result,
@@ -82,10 +84,14 @@ method handleEvent*(self: Stage1, window: RenderWindow, event: Event) =
   self.player.handleMovementEvents(event)
 
 proc update*(self: Stage1, window: RenderWindow) =
+  var lastPlayerCoords = self.player.sprite.position
   discard self.Scene.update(window)
   
   # if not self.isGameOver:
   #   self.isGameOver = not self.entities.anyIt(it of Player)
+
+  if self.sidescrolling:
+    self.view.move(vec2(self.player.sprite.position.x - lastPlayerCoords.x, float32(0)))
 
   if self.isGameOver:
     return
@@ -93,10 +99,11 @@ proc update*(self: Stage1, window: RenderWindow) =
   # Purge all dead entities
   self.entities.keepItIf(not it.isDead)
 
+  window.view = self.view
+
 proc draw*(self: Stage1, window: RenderWindow) =
   # var mouseRect = newRectangleShape(vec2(self.currentCursor.rect.width, self.currentCursor.rect.height))
   # mouseRect.position = vec2(self.currentCursor.rect.left, self.currentCursor.rect.top)
-
   window.draw(self.background)
 
   self.Scene.draw(window)

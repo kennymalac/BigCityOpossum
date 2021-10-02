@@ -25,6 +25,7 @@ proc initScene*(self: Scene, window: RenderWindow, title: string, origin: Vector
   self.origin = origin
   self.size = window.size
   self.view = newView(origin, window.size)
+  window.view = self.view
   self.assetLoader = newAssetLoader("assets")
   self.previousTime = getTime()
   self.currentTime = getTime()

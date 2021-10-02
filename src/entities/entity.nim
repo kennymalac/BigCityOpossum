@@ -30,7 +30,7 @@ proc newEntity*(sprite: Sprite): Entity =
   new result
   initEntity(result, sprite)
 
-method update*(self: Entity, dt: times.Duration) =
+method update*(self: Entity, dt: times.Duration) {.base.} =
   discard
 
 proc draw() =
