@@ -5,7 +5,7 @@ author        = "Kenneth Malac"
 description   = "Opossums are cute!"
 license       = "ZLIB"
 srcDir        = "src"
-bin           = @["OpossumFun"]
+bin           = @["BigCityOpossum"]
 
 # Dependencies
 

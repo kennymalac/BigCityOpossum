@@ -13,7 +13,7 @@ proc newSoundRegistry*(assetLoader: AssetLoader): SoundRegistry =
 
 proc registerSound*(self: SoundRegistry, kind: string, location: string): Sound =
   self.registry[kind] = self.assetLoader.newSoundAsset(kind, location)
-  
+
 proc getSound*(self: SoundRegistry, kind: string): Sound =
   # WARNING - Do not create more than 256 Sound Instances!
   # SFML has an upper limit of 256 instances

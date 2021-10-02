@@ -38,7 +38,7 @@ proc draw() =
 
 proc rotate(self: Entity, position: Vector2i) =
   self.sprite.rotation = vAngle(self.sprite.position, position)
-  
+
 proc updateRectPosition*(self: Entity) =
   self.rect = rect(self.sprite.position.x, self.sprite.position.y, cfloat(self.sprite.scaledSize.x) / 2, cfloat(self.sprite.scaledSize.y) / 2)
 
@@ -48,7 +48,7 @@ proc move*(self: Entity, direction: Vector2f) =
   moveVector.y *= self.speed
   self.sprite.move(moveVector)
   self.updateRectPosition()
-  
+
 
 proc getNearest[E](self: Entity, entities: seq[Entity]): Option[E] =
   var distance: float = high(float)
@@ -58,9 +58,9 @@ proc getNearest[E](self: Entity, entities: seq[Entity]): Option[E] =
       if entDistance < distance:
         distance = entDistance
         result = some(E(entity))
-        
+
   if result == nil:
     result = none(E)
-  
+
 proc print*(self: Entity) =
   echo "I am an entity\n"

@@ -40,7 +40,7 @@ proc load*(self: Scene) =
 method handleEvent*(self: Scene, window: RenderWindow, event: Event) {.base.} =
   # Scenes overload this to handle events
   discard
-  
+
 proc pollEvent*(self: Scene, window: RenderWindow) =
   var event: Event
   while window.poll_event(event):
@@ -48,9 +48,9 @@ proc pollEvent*(self: Scene, window: RenderWindow) =
     of EventType.Closed:
       window.close()
     else: discard
-      
+
     self.handleEvent(window, event)
-  
+
 proc update*(self: Scene, window: RenderWindow): Duration =
   self.previousTime = self.currentTime
   self.currentTime = getTime()
