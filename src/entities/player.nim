@@ -1,11 +1,13 @@
 import options
 import times
+import strformat
 
 import csfml
 import entity
 import ../assetLoader
 
 import things
+import enemy
 
 # let opossumWalkImages = @["walk-1.png", "walk-2.png"]
 let opossumImg = "opossum1.png"
@@ -18,6 +20,7 @@ type
     attacking*: bool
     eating*: bool
     eatTarget*: Option[Trash]
+    attackTarget*: Option[Enemy]
 
     triggeredAction*: bool
     # mouthHitbox: FloatRect
@@ -32,7 +35,7 @@ type
 
 proc newPlayer*(loader: AssetLoader): Player =
   let sprite = loader.newSprite(loader.newImageAsset(opossumImg))
-  result = Player(health: 100, strength: 5, speed: 3, triggeredAction: false, walking: false, attackSpeed: initDuration(seconds=1), eatSpeed: initDuration(seconds=2))
+  result = Player(health: 100, strength: 5, speed: 3, triggeredAction: false, walking: false, attackSpeed: initDuration(seconds=1), eatSpeed: initDuration(seconds=2), attackTimer: initDuration(seconds=0), eatTimer: initDuration(seconds=0))
   initEntity(result, sprite)
 
 proc addHealth(self: Player, health: int) =
@@ -41,6 +44,7 @@ proc addHealth(self: Player, health: int) =
 proc eatTrash*(self: Player, trash: Trash, dt: Duration) =
   # TODO use eating animation
   if trash.isEmpty:
+    self.eating = false
     return
 
   trash.health -= self.strength
@@ -53,29 +57,48 @@ proc eatTrash*(self: Player, trash: Trash, dt: Duration) =
 
   # Reset timer
   self.eatTimer = initDuration(seconds=0)
+  if not self.triggeredAction:
+    self.eating = false
 
-# proc attack*(self: Player, entity: Enemy, dt: Duration) =
-#   # TODO use attack animation
-#   self.walking = false
-#   entity.health -= self.strength
+proc attack*(self: Player, enemy: Enemy, dt: Duration) =
+  if enemy.isDead:
+    self.attacking = false
+    return
+    
+  # TODO use attack animation
+  enemy.health -= self.strength
+  echo(fmt"Attacked enemy for {self.strength} damage")
+  echo(fmt"Enemy health: {enemy.health}")
   
+  if enemy.health <= 0:
+    echo(fmt"Killed Enemy")
+    enemy.isDead = true
+
+  # Reset timer
+  self.attackTimer = initDuration(seconds=0)
+  if not self.triggeredAction:
+    self.attacking = false
     
 proc triggerAction*(self: Player, entities: seq[Entity], dt: Duration) =
   var attacking: seq[Entity] = @[]
   var eating: seq[Entity] = @[]
 
   for entity in entities:
-    if entity of Trash:
+    if entity of Enemy:
+      if self.intersects(entity):
+        attacking.add(entity)
+    elif entity of Trash:
       if self.intersects(entity):
         eating.add(entity)
-    #elif entity of Enemy
 
   # NOTE: Attacking has precedence over eating
   if len(attacking) > 0:
-    #var enemy = self.getNearest[Enemy](attacking).get()
+    self.attackTarget = getNearest[Enemy](self.Entity, attacking)
     self.attacking = true
+    self.eating = false
 
   elif len(eating) > 0:
+    self.attacking = false
     self.eatTarget = getNearest[Trash](self.Entity, eating)
     self.eating = true
 
@@ -87,8 +110,8 @@ method update*(self: Player, dt: times.Duration) =
 
   if self.attacking:
     self.attackTimer += dt
-    #if self.eatTimer >= self.eatSpeed:
-      #self.attack(enemy, dt)
+    if self.attackTimer >= self.attackSpeed:
+      self.attack(self.attackTarget.get(), dt)
 
   if self.eating:
     self.eatTimer += dt

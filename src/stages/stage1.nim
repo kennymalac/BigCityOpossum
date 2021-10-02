@@ -13,7 +13,7 @@ import ../assetLoader
 import ../soundRegistry
 #import ../menus/gameHud
 import ../entities/entity
-#import ../entities/enemy
+import ../entities/enemy
 import ../entities/things
 import ../entities/player
 
@@ -80,6 +80,18 @@ proc load*(self: Stage1) =
     newTrash(self.assetLoader.newSprite(binAsset), TrashBin),
     newTrash(self.assetLoader.newSprite(binAsset), TrashBin)
   ]
+
+  let ratAsset = self.assetLoader.getRatAssets()
+  let rats = @[
+    newRat(self.assetLoader.newSprite(ratAsset)),
+    newRat(self.assetLoader.newSprite(ratAsset))
+  ]
+  var ratPos = 200
+  for rat in rats:
+    rat.sprite.position = vec2(ratPos, 600)
+    self.entities.add(Entity(rat))
+    ratPos += 150
+  
   var trashPos = 200
   for trash in trashBins:
     trash.sprite.position = vec2(trashPos, 300)
