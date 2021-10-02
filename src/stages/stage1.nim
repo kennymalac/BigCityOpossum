@@ -37,7 +37,7 @@ type
     sideScrolling: bool    # gameHud: GameHud
 
 proc newStage1*(window: RenderWindow): Stage1 =
-  let boundary: Boundary = (cint(10), cint(0), cint(300), cint(0))
+  let boundary: Boundary = (cint(10), cint(2000), cint(300), cint(0))
   result = Stage1(boundary: boundary, isGameOver: false, sideScrolling: true)
 
   initScene(
@@ -108,24 +108,36 @@ proc update*(self: Stage1, window: RenderWindow) =
   
   # if not self.isGameOver:
   #   self.isGameOver = not self.entities.anyIt(it of Player)
+
+  # Player boundaries
+  # left boundary
   if self.player.sprite.position.x < (cfloat(self.boundary.left) + cfloat(self.player.sprite.scaledSize.x/2)):
     self.player.sprite.position = vec2(cfloat(self.boundary.left) + cfloat(self.player.sprite.scaledSize.x/2), self.player.sprite.position.y)
     self.player.updateRectPosition()
+  # right boundary
+  if self.player.sprite.position.x > (cfloat(self.boundary.right) - cfloat(self.player.sprite.scaledSize.x/2)):
+    self.player.sprite.position = vec2(cfloat(self.boundary.right) - cfloat(self.player.sprite.scaledSize.x/2), self.player.sprite.position.y)
+    self.player.updateRectPosition()
+    
     
   if self.sidescrolling:
     # How the coordinates of player has changed
     var xDifference = self.player.sprite.position.x - lastPlayerCoords.x
     # If player is navigating left
     if xDifference < 0:
-      echo("diff", xDifference)
+      #echo("diff", xDifference)
       let viewLeftSide = self.view.center.x - floor(self.view.size.x/2)
       echo(viewLeftSide)
       if viewLeftSide - xDifference <= float(self.boundary.left):
         xDifference += float(self.boundary.left) - (float(viewLeftSide) - xDifference)
-        echo("diff 2 ", xDifference)
+        #echo("diff 2 ", xDifference)
 
-      # float(self.boundary.left) - xDifference
-    
+    elif xDifference > 0:
+      let viewRightSide = self.view.center.x + ceil(self.view.size.x/2)
+      if viewRightSide + xDifference >= float(self.boundary.right):
+        xDifference += float(self.boundary.right) - (float(viewRightSide) - xDifference)
+
+
     self.view.move(vec2(float32(xDifference), float32(0)))
 
   if self.isGameOver:
