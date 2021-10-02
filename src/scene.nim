@@ -59,6 +59,7 @@ proc update*(self: Scene, window: RenderWindow): Duration =
 
   for i, entity in self.entities:
     entity.update(dt)
+    entity.updateRectPosition()
 
   return dt
 

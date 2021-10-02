@@ -91,10 +91,15 @@ method handleEvent*(self: Stage1, window: RenderWindow, event: Event) =
   else: discard
 
   self.player.handleMovementEvents(event)
+  self.player.handleActionEvents(event)
 
 proc update*(self: Stage1, window: RenderWindow) =
   var lastPlayerCoords = self.player.sprite.position
-  discard self.Scene.update(window)
+  let dt = self.Scene.update(window)
+
+  # figure out which action was triggered
+  if self.player.triggeredAction:
+    self.player.triggerAction(self.entities, dt)
   
   # if not self.isGameOver:
   #   self.isGameOver = not self.entities.anyIt(it of Player)

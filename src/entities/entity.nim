@@ -49,8 +49,12 @@ proc move*(self: Entity, direction: Vector2f) =
   self.sprite.move(moveVector)
   self.updateRectPosition()
 
+proc intersects*(self: Entity, entity: Entity, rect: Option[FloatRect] = none(FloatRect)): bool =
+  var selfRect = (if rect.isSome: rect.get() else: self.rect)
+  return selfRect.intersects(entity.rect, self.interRect)
 
-proc getNearest[E](self: Entity, entities: seq[Entity]): Option[E] =
+proc getNearest*[E](self: Entity, entities: seq[Entity]): Option[E] =
+  result = none(E)
   var distance: float = high(float)
   for entity in entities:
     if entity of E:
@@ -58,9 +62,6 @@ proc getNearest[E](self: Entity, entities: seq[Entity]): Option[E] =
       if entDistance < distance:
         distance = entDistance
         result = some(E(entity))
-
-  if result == nil:
-    result = none(E)
 
 proc print*(self: Entity) =
   echo "I am an entity\n"

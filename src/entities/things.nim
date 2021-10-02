@@ -14,6 +14,7 @@ type
 
   Trash* = ref object of Entity
     health*: int
+    isEmpty*: bool
     kind: TrashKind
 
 proc getTrashAsset*(loader: AssetLoader, kind: TrashKind): ImageAsset =
