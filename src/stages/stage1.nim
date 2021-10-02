@@ -13,6 +13,7 @@ import ../soundRegistry
 #import ../menus/gameHud
 import ../entities/entity
 #import ../entities/enemy
+import ../entities/things
 import ../entities/player
 
 import stage
@@ -71,6 +72,14 @@ proc load*(self: Stage1) =
   self.player.sprite.position = vec2(200, 200)
   
   self.entities.add(Entity(self.player))
+
+  let binAsset = self.assetLoader.getTrashAsset(TrashBin)
+  let trashBins = @[newTrash(self.assetLoader.newSprite(binAsset), TrashBin), newTrash(self.assetLoader.newSprite(binAsset), TrashBin), newTrash(self.assetLoader.newSprite(binAsset), TrashBin)]
+  var trashPos = 200
+  for trash in trashBins:
+    trash.sprite.position = vec2(trashPos, 300)
+    self.entities.add(Entity(trash))
+    trashPos += 100
 
 method handleEvent*(self: Stage1, window: RenderWindow, event: Event) =
   case event.kind
