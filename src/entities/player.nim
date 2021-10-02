@@ -8,7 +8,7 @@ import ../assetLoader
 import things
 
 # let opossumWalkImages = @["walk-1.png", "walk-2.png"]
-let opossumImg = "ant-sprite.png"
+let opossumImg = "opossum1.png"
 
 type
   Player* = ref object of Entity

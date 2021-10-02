@@ -4,6 +4,7 @@ import sequtils
 import options
 import os
 import random
+import math
 
 import csfml, csfml/audio
 
@@ -36,7 +37,7 @@ type
     sideScrolling: bool    # gameHud: GameHud
 
 proc newStage1*(window: RenderWindow): Stage1 =
-  let boundary: Boundary = (cint(300), cint(0), cint(0), cint(0))
+  let boundary: Boundary = (cint(10), cint(0), cint(300), cint(0))
   result = Stage1(boundary: boundary, isGameOver: false, sideScrolling: true)
 
   initScene(
@@ -74,7 +75,11 @@ proc load*(self: Stage1) =
   self.entities.add(Entity(self.player))
 
   let binAsset = self.assetLoader.getTrashAsset(TrashBin)
-  let trashBins = @[newTrash(self.assetLoader.newSprite(binAsset), TrashBin), newTrash(self.assetLoader.newSprite(binAsset), TrashBin), newTrash(self.assetLoader.newSprite(binAsset), TrashBin)]
+  let trashBins = @[
+    newTrash(self.assetLoader.newSprite(binAsset), TrashBin),
+    newTrash(self.assetLoader.newSprite(binAsset), TrashBin),
+    newTrash(self.assetLoader.newSprite(binAsset), TrashBin)
+  ]
   var trashPos = 200
   for trash in trashBins:
     trash.sprite.position = vec2(trashPos, 300)
@@ -103,9 +108,25 @@ proc update*(self: Stage1, window: RenderWindow) =
   
   # if not self.isGameOver:
   #   self.isGameOver = not self.entities.anyIt(it of Player)
-
+  if self.player.sprite.position.x < (cfloat(self.boundary.left) + cfloat(self.player.sprite.scaledSize.x/2)):
+    self.player.sprite.position = vec2(cfloat(self.boundary.left) + cfloat(self.player.sprite.scaledSize.x/2), self.player.sprite.position.y)
+    self.player.updateRectPosition()
+    
   if self.sidescrolling:
-    self.view.move(vec2(self.player.sprite.position.x - lastPlayerCoords.x, float32(0)))
+    # How the coordinates of player has changed
+    var xDifference = self.player.sprite.position.x - lastPlayerCoords.x
+    # If player is navigating left
+    if xDifference < 0:
+      echo("diff", xDifference)
+      let viewLeftSide = self.view.center.x - floor(self.view.size.x/2)
+      echo(viewLeftSide)
+      if viewLeftSide - xDifference <= float(self.boundary.left):
+        xDifference += float(self.boundary.left) - (float(viewLeftSide) - xDifference)
+        echo("diff 2 ", xDifference)
+
+      # float(self.boundary.left) - xDifference
+    
+    self.view.move(vec2(float32(xDifference), float32(0)))
 
   if self.isGameOver:
     return

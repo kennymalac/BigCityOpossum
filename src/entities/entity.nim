@@ -1,4 +1,5 @@
 import options
+import math
 
 import csfml
 import times
@@ -16,7 +17,7 @@ type
 
 proc initEntity*(self: Entity, sprite: Sprite) =
   self.sprite = sprite
-  self.sprite.origin = vec2(cfloat(sprite.scaledSize.x / 2), cfloat(sprite.scaledSize.y) / 2)
+  self.sprite.origin = vec2(cfloat(floor(sprite.scaledSize.x / 2)), cfloat(floor(sprite.scaledSize.y / 2)))
   # TODO no hardcoded rect padding
   self.rect = rect(sprite.position.x - 5, sprite.position.y - 5, cfloat(sprite.scaledSize.x) / 2, cfloat(sprite.scaledSize.y) / 2)
   self.interRect = rect(0, 0, 0, 0)
