@@ -167,18 +167,23 @@ proc update*(self: Stage1, window: RenderWindow) =
 
   # Stage boundaries
   let boundary = self.getBoundary()
+
+  # How the coordinates of player has changed
+  var xDifference = self.player.sprite.position.x - lastPlayerCoords.x
   # left boundary
-  if self.player.sprite.position.x < (cfloat(boundary.left) + cfloat(self.player.sprite.scaledSize.x/2)):
+  if xDifference < 0 and self.player.sprite.position.x < (cfloat(boundary.left) + cfloat(self.player.sprite.scaledSize.x/2)):
+    #echo(xDifference)
+    #echo("left", boundary.left)
     self.player.sprite.position = vec2(cfloat(boundary.left) + cfloat(self.player.sprite.scaledSize.x/2), self.player.sprite.position.y)
     self.player.updateRectPosition()
   # right boundary
-  if self.player.sprite.position.x > (cfloat(boundary.right) - cfloat(self.player.sprite.scaledSize.x/2)):
+  if xDifference > 0 and self.player.sprite.position.x > (cfloat(boundary.right) - cfloat(self.player.sprite.scaledSize.x/2)):
+    #echo(xDifference)
+    #echo("right", boundary.right)
     self.player.sprite.position = vec2(cfloat(boundary.right) - cfloat(self.player.sprite.scaledSize.x/2), self.player.sprite.position.y)
     self.player.updateRectPosition()
 
   if self.sidescrolling:
-    # How the coordinates of player has changed
-    var xDifference = self.player.sprite.position.x - lastPlayerCoords.x
     # If player is navigating left
     if xDifference < 0:
       #echo("diff", xDifference)
@@ -220,8 +225,18 @@ proc draw*(self: Stage1, window: RenderWindow) =
 
   let healthText = newText(fmt"Health: {self.player.health}", self.font)
   healthText.characterSize = 18
+  if self.player.health >= 70:
+    healthText.fillColor = Green
+  elif self.player.health > 40:
+    healthText.fillColor = Yellow
+  else:
+    healthText.fillColor = Red
   healthText.position = vec2(self.view.center.x - cfloat(healthText.globalBounds.width/2), 20)
   window.draw(healthText)
+  let stabilityText = newText(fmt"Stability: {self.player.stability}", self.font)
+  stabilityText.characterSize = 18
+  stabilityText.position = vec2(self.view.center.x - cfloat(stabilityText.globalBounds.width/2), 42)
+  window.draw(stabilityText)
 
   #window.draw(self.scoreText)
 

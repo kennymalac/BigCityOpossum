@@ -15,6 +15,7 @@ let opossumImg = "opossum3.png"
 
 type
   Player* = ref object of Entity
+    stability*: int
     strength*: int
     walking*: bool
     attacking*: bool
@@ -30,17 +31,22 @@ type
 
     attackTimer: Duration
     eatTimer: Duration
+    stabilityTimer: Duration
+    stabilityLossSpeed: Duration
     
     trajectory*: Vector2f
 
 proc newPlayer*(loader: AssetLoader): Player =
   let sprite = loader.newSprite(loader.newImageAsset(opossumImg))
-  result = Player(health: 100, strength: 5, speed: 3, triggeredAction: false, walking: false, attackSpeed: initDuration(seconds=1), eatSpeed: initDuration(seconds=2), attackTimer: initDuration(seconds=0), eatTimer: initDuration(seconds=0))
+  result = Player(health: 100, stability: 50, strength: 5, speed: 3, triggeredAction: false, walking: false, attackSpeed: initDuration(seconds=1), eatSpeed: initDuration(seconds=2), attackTimer: initDuration(seconds=0), eatTimer: initDuration(seconds=0), stabilityTimer: initDuration(seconds=0), stabilityLossSpeed: initDuration(seconds=1))
   initEntity(result, sprite)
 
 proc addHealth(self: Player, health: int) =
-  self.health = min(self.health + 5, 100)
-  
+  self.health = min(self.health + health, 100)
+
+proc minusHealth(self: Player, health: int) =
+  self.health = max(self.health - health, 0)
+
 proc eatTrash*(self: Player, trash: Trash, dt: Duration) =
   # TODO use eating animation
   if trash.isEmpty:
@@ -107,6 +113,15 @@ method update*(self: Player, dt: times.Duration) =
     # Can't walk while eating or attacking
     self.walking = false
     # Scene needs to call triggerPlayerAction!!
+
+  self.stabilityTimer += dt
+  if self.stabilityTimer >= self.stabilityLossSpeed:
+    if self.stability > 0:
+      self.stability -= 1
+    else:
+      # 0 stability means player slowly loses health
+      self.minusHealth(1)
+    self.stabilityTimer = initDuration(seconds=0)
 
   if self.attacking:
     self.attackTimer += dt
