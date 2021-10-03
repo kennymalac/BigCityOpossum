@@ -40,8 +40,8 @@ proc attack*(self: Enemy) =
     
   # TODO use attack animation
   self.player.health -= self.strength
-  echo(fmt"Enemy attacked player for {self.strength} damage")
-  echo(fmt"Player health: {self.player.health}")
+  #echo(fmt"Enemy attacked player for {self.strength} damage")
+  #echo(fmt"Player health: {self.player.health}")
 
   # Reset timer
   self.attackTimer = initDuration(seconds=0)
@@ -64,6 +64,11 @@ method update*(self: Rat, dt: times.Duration) =
     self.directionTimer += dt
     if self.directionTimer >= self.directionLag:
       self.direction = normalize(self.player.sprite.position - self.sprite.position)
+      if self.direction.x > 0:
+        self.flip()
+      elif self.direction.x < 0:
+        self.unflip()
+
       self.directionTimer = initDuration(seconds = 0)
 
     if bool(self.direction.x) or bool(self.direction.y):
