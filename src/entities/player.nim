@@ -33,7 +33,7 @@ type
     eatTimer: Duration
     stabilityTimer: Duration
     stabilityLossSpeed: Duration
-    
+
     trajectory*: Vector2f
 
 proc newPlayer*(loader: AssetLoader): Player =
@@ -70,12 +70,12 @@ proc attack*(self: Player, enemy: Enemy, dt: Duration) =
   if enemy.isDead:
     self.attacking = false
     return
-    
+
   # TODO use attack animation
   enemy.health -= self.strength
   echo(fmt"Attacked enemy for {self.strength} damage")
   echo(fmt"Enemy health: {enemy.health}")
-  
+
   if enemy.health <= 0:
     echo(fmt"Killed Enemy")
     enemy.isDead = true
@@ -84,7 +84,7 @@ proc attack*(self: Player, enemy: Enemy, dt: Duration) =
   self.attackTimer = initDuration(seconds=0)
   if not self.triggeredAction:
     self.attacking = false
-    
+
 proc triggerAction*(self: Player, entities: seq[Entity], dt: Duration) =
   var attacking: seq[Entity] = @[]
   var eating: seq[Entity] = @[]
@@ -132,8 +132,12 @@ method update*(self: Player, dt: times.Duration) =
     self.eatTimer += dt
     if self.eatTimer >= self.eatSpeed:
       self.eatTrash(self.eatTarget.get(), dt)
-    
+
   if self.walking:
+    if self.trajectory.x == 1:
+      self.flip()
+    elif self.trajectory.x == -1:
+      self.unflip()
     self.Entity.move(self.trajectory)
 
 proc handleMovementEvents*(self: Player, event: Event) =
@@ -184,4 +188,3 @@ proc handleActionEvents*(self: Player, event: Event) =
       self.triggeredAction = false
     else: discard
   else: discard
-  

@@ -20,6 +20,7 @@ proc initEntity*(self: Entity, sprite: Sprite) =
   self.sprite = sprite
   self.sprite.origin = vec2(cfloat(floor(sprite.scaledSize.x / 2)), cfloat(floor(sprite.scaledSize.y / 2)))
   # TODO no hardcoded rect padding
+
   self.rect = rect(sprite.position.x - 5, sprite.position.y - 5, cfloat(sprite.scaledSize.x) / 2, cfloat(sprite.scaledSize.y) / 2)
   self.interRect = rect(0, 0, 0, 0)
 
@@ -38,8 +39,14 @@ method update*(self: Entity, dt: times.Duration) {.base.} =
 proc draw() =
   discard
 
-proc rotate(self: Entity, position: Vector2i) =
+proc rotate*(self: Entity, position: Vector2f) =
   self.sprite.rotation = vAngle(self.sprite.position, position)
+
+proc flip*(self: Entity) =
+  self.sprite.textureRect = rect(cint(self.sprite.scaledSize.x), 0, -cint(self.sprite.scaledSize.x), cint(self.sprite.scaledSize.y))
+
+proc unflip*(self: Entity) =
+  self.sprite.textureRect = rect(0, 0, cint(self.sprite.scaledSize.x), cint(self.sprite.scaledSize.y))
 
 proc updateRectPosition*(self: Entity) =
   self.rect = rect(self.sprite.position.x, self.sprite.position.y, cfloat(self.sprite.scaledSize.x) / 2, cfloat(self.sprite.scaledSize.y) / 2)
