@@ -44,7 +44,7 @@ type
 
 proc newStage1*(window: RenderWindow): Stage1 =
   let boundary: Boundary = (cint(10), cint(6400), cint(300), cint(0))
-  result = Stage1(boundary: boundary, isGameOver: false, sideScrolling: false, currentArena: Arena(active: false), currentArenaIdx: 0)
+  result = Stage1(boundary: boundary, isGameOver: false, sideScrolling: false, currentArena: Arena(active: false, done: false), currentArenaIdx: -1)
 
   initScene(
     result,
@@ -88,8 +88,8 @@ proc load*(self: Stage1) =
   ]
 
   let ratAsset = self.assetLoader.getRatAssets()
-  let rats: seq[Rat] = @[
-    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+  var rats: seq[Rat] = @[
+#    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
     newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
     newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity)
   ]
@@ -99,19 +99,50 @@ proc load*(self: Stage1) =
     self.entities.add(Entity(rat))
     ratPos += 150
 
-  let arB: Boundary = (left: cint(600), right: cint(1880), top: cint(-1), bottom: cint(-1))
-  let arena1 = newArena(arB, self.font)
+  rats = @[
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+  ]
+  ratPos = 2600
+  for rat in rats:
+    rat.sprite.position = vec2(ratPos, 750)
+    self.entities.add(Entity(rat))
+    ratPos += 200
+
+  rats = @[
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+  ]
+  ratPos = 4000
+  for rat in rats:
+    rat.sprite.position = vec2(ratPos, 750)
+    self.entities.add(Entity(rat))
+    ratPos += 200
+
+  let arB1: Boundary = (left: cint(600), right: cint(1880), top: cint(-1), bottom: cint(-1))
+  let arena1 = newArena(arB1, self.font)
   self.arenas.add(arena1)
 
+  let arB2: Boundary = (left: cint(2300), right: cint(3580), top: cint(-1), bottom: cint(-1))
+  let arena2 = newArena(arB2, self.font)
+  self.arenas.add(arena2)
+
+  let arB3: Boundary = (left: cint(3400), right: cint(4680), top: cint(-1), bottom: cint(-1))
+  let arena3 = newArena(arB3, self.font)
+  self.arenas.add(arena3)
+  
   for entity in self.entities:
-    if entity of Enemy and arena1.withinBounds(entity.sprite.position):
-      arena1.addEnemy(Enemy(entity))
+    if entity of Enemy:
+      if arena1.withinBounds(entity.sprite.position):
+        arena1.addEnemy(Enemy(entity))
+      elif arena2.withinBounds(entity.sprite.position):
+        arena2.addEnemy(Enemy(entity))
+      elif arena3.withinBounds(entity.sprite.position):
+        arena3.addEnemy(Enemy(entity))
     
-  var trashPos = 200
+  var trashPos = 450
   for trash in trashBins:
     trash.sprite.position = vec2(trashPos, 300)
     self.entities.add(Entity(trash))
-    trashPos += 200
+    trashPos += 400
 
 
 method handleEvent*(self: Stage1, window: RenderWindow, event: Event) =
@@ -159,7 +190,8 @@ proc update*(self: Stage1, window: RenderWindow) =
     self.currentArena.update(dt)
     
   # If player is in left bounds of the next arena, make that arena the current arena
-  elif not self.currentArena.started and self.player.sprite.position.x >= float(self.arenas[self.currentArenaIdx].boundary.left):
+  elif not self.currentArena.started and self.currentArenaIdx < len(self.arenas)-1 and self.player.sprite.position.x >= float(self.arenas[self.currentArenaIdx + 1].boundary.left):
+    self.currentArenaIdx += 1
     self.currentArena = self.arenas[self.currentArenaIdx]
     self.currentArena.active = true
     self.currentArena.update(dt)
@@ -205,6 +237,9 @@ proc update*(self: Stage1, window: RenderWindow) =
 
   if self.isGameOver:
     return
+
+  if not self.currentArena.active and self.currentArena.done:
+    self.currentArena = Arena(active: false, done: false)
 
   # Purge all dead entities
   self.entities.keepItIf(not it.isDead)
