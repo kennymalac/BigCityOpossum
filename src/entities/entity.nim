@@ -11,6 +11,7 @@ type
   Entity* = ref object of RootObj
     sprite*: Sprite
     rect*: FloatRect
+    health*: int
     speed*: float
     isDead*: bool
     interRect*: FloatRect

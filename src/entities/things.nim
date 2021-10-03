@@ -4,7 +4,7 @@ import csfml
 import entity
 import ../assetLoader
 
-let trashBinImg = "succ-aloe-5-v1.png"
+let trashBinImg = "trashcan-black.png"
 let trashBagImg = "succ-aloe-5-v2.png"
 
 type
@@ -13,14 +13,13 @@ type
     TrashBag
 
   Trash* = ref object of Entity
-    health*: int
     isEmpty*: bool
     kind: TrashKind
 
 proc getTrashAsset*(loader: AssetLoader, kind: TrashKind): ImageAsset =
   case kind:
   of TrashBin:
-    return loader.newImageAsset(trashBagImg)
+    return loader.newImageAsset(trashBinImg)
   of TrashBag:
     return loader.newImageAsset(trashBagImg)
 

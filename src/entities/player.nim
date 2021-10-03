@@ -3,18 +3,18 @@ import times
 import strformat
 
 import csfml
+
 import entity
 import ../assetLoader
-
+import ../animation
 import things
 import enemy
 
 # let opossumWalkImages = @["walk-1.png", "walk-2.png"]
-let opossumImg = "opossum1.png"
+let opossumImg = "opossum3.png"
 
 type
   Player* = ref object of Entity
-    health*: int
     strength*: int
     walking*: bool
     attacking*: bool

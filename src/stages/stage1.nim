@@ -83,8 +83,8 @@ proc load*(self: Stage1) =
 
   let ratAsset = self.assetLoader.getRatAssets()
   let rats = @[
-    newRat(self.assetLoader.newSprite(ratAsset)),
-    newRat(self.assetLoader.newSprite(ratAsset))
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity)
   ]
   var ratPos = 200
   for rat in rats:
@@ -96,7 +96,7 @@ proc load*(self: Stage1) =
   for trash in trashBins:
     trash.sprite.position = vec2(trashPos, 300)
     self.entities.add(Entity(trash))
-    trashPos += 100
+    trashPos += 200
 
 method handleEvent*(self: Stage1, window: RenderWindow, event: Event) =
   case event.kind
@@ -152,6 +152,11 @@ proc update*(self: Stage1, window: RenderWindow) =
 
     self.view.move(vec2(float32(xDifference), float32(0)))
 
+  if self.player.health <= 0:
+    echo(fmt"Killed Player")
+    self.player.isDead = true
+    self.isGameOver = true
+    
   if self.isGameOver:
     return
 
