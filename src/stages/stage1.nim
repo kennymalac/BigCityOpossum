@@ -43,7 +43,7 @@ type
     sideScrolling: bool    # gameHud: GameHud
 
 proc newStage1*(window: RenderWindow): Stage1 =
-  let boundary: Boundary = (cint(10), cint(4000), cint(300), cint(0))
+  let boundary: Boundary = (cint(10), cint(6400), cint(300), cint(0))
   result = Stage1(boundary: boundary, isGameOver: false, sideScrolling: false, currentArena: Arena(active: false), currentArenaIdx: 0)
 
   initScene(
@@ -67,7 +67,7 @@ proc load*(self: Stage1) =
   # self.gameMusic.loop = true
   # self.gameMusic.play()
   self.background = self.assetLoader.newSprite(
-    self.assetLoader.newImageAsset("background_1-1.png")
+    self.assetLoader.newImageAsset("background-test.png")
   )
 
   self.background.scale = vec2(1, 1)
@@ -236,6 +236,7 @@ proc draw*(self: Stage1, window: RenderWindow) =
   let stabilityText = newText(fmt"Stability: {self.player.stability}", self.font)
   stabilityText.characterSize = 18
   stabilityText.position = vec2(self.view.center.x - cfloat(stabilityText.globalBounds.width/2), 42)
+  stabilityText.fillColor = Magenta
   window.draw(stabilityText)
 
   #window.draw(self.scoreText)
