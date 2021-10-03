@@ -43,7 +43,7 @@ type
     sideScrolling: bool    # gameHud: GameHud
 
 proc newStage1*(window: RenderWindow): Stage1 =
-  let boundary: Boundary = (cint(10), cint(3000), cint(300), cint(0))
+  let boundary: Boundary = (cint(10), cint(4000), cint(300), cint(0))
   result = Stage1(boundary: boundary, isGameOver: false, sideScrolling: false, currentArena: Arena(active: false), currentArenaIdx: 0)
 
   initScene(
@@ -126,6 +126,12 @@ method handleEvent*(self: Stage1, window: RenderWindow, event: Event) =
   self.player.handleMovementEvents(event)
   self.player.handleActionEvents(event)
 
+proc getBoundary(self: Stage1): Boundary =
+  if self.currentArena.active:
+    return self.currentArena.boundary
+
+  return self.boundary
+  
 proc update*(self: Stage1, window: RenderWindow) =
   var lastPlayerCoords = self.player.sprite.position
   let dt = self.Scene.update(window)
@@ -146,28 +152,28 @@ proc update*(self: Stage1, window: RenderWindow) =
     # maybe the enemies should walk out from the right side
     self.currentArena.activate()
 
-  elif not self.currentArena.active and self.player.sprite.position.x > self.view.center.x-300:
+  elif (not self.currentArena.active or self.currentArena.done) and self.player.sprite.position.x > self.view.center.x-300:
     self.sidescrolling = true
 
   if self.currentArena.active:
     self.currentArena.update(dt)
+    
   # If player is in left bounds of the next arena, make that arena the current arena
-  elif self.player.sprite.position.x >= float(self.arenas[self.currentArenaIdx].boundary.left):
+  elif not self.currentArena.started and self.player.sprite.position.x >= float(self.arenas[self.currentArenaIdx].boundary.left):
     self.currentArena = self.arenas[self.currentArenaIdx]
     self.currentArena.active = true
     self.currentArena.update(dt)
+    # add arena boundaries if arena active
 
-  # Player boundaries
-
-  # TODO add arena boundaries if arena active
-
+  # Stage boundaries
+  let boundary = self.getBoundary()
   # left boundary
-  if self.player.sprite.position.x < (cfloat(self.boundary.left) + cfloat(self.player.sprite.scaledSize.x/2)):
-    self.player.sprite.position = vec2(cfloat(self.boundary.left) + cfloat(self.player.sprite.scaledSize.x/2), self.player.sprite.position.y)
+  if self.player.sprite.position.x < (cfloat(boundary.left) + cfloat(self.player.sprite.scaledSize.x/2)):
+    self.player.sprite.position = vec2(cfloat(boundary.left) + cfloat(self.player.sprite.scaledSize.x/2), self.player.sprite.position.y)
     self.player.updateRectPosition()
   # right boundary
-  if self.player.sprite.position.x > (cfloat(self.boundary.right) - cfloat(self.player.sprite.scaledSize.x/2)):
-    self.player.sprite.position = vec2(cfloat(self.boundary.right) - cfloat(self.player.sprite.scaledSize.x/2), self.player.sprite.position.y)
+  if self.player.sprite.position.x > (cfloat(boundary.right) - cfloat(self.player.sprite.scaledSize.x/2)):
+    self.player.sprite.position = vec2(cfloat(boundary.right) - cfloat(self.player.sprite.scaledSize.x/2), self.player.sprite.position.y)
     self.player.updateRectPosition()
 
   if self.sidescrolling:
@@ -177,7 +183,6 @@ proc update*(self: Stage1, window: RenderWindow) =
     if xDifference < 0:
       #echo("diff", xDifference)
       let viewLeftSide = self.view.center.x - floor(self.view.size.x/2)
-      echo(viewLeftSide)
       if viewLeftSide - xDifference <= float(self.boundary.left):
         xDifference += float(self.boundary.left) - (float(viewLeftSide) - xDifference)
         #echo("diff 2 ", xDifference)

@@ -72,6 +72,7 @@ proc update*(self: Arena, dt: Duration) =
       # timer is done
       self.showContinueText = false
       self.arenaModeTextTimer = initDuration(seconds=0)
+      self.active = false
 
 proc draw*(self: Arena, window: RenderWindow, view: View) =
   if self.showFightText:
