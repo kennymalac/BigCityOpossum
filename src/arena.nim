@@ -1,7 +1,10 @@
 import times
-import stages/stage
+import sequtils
 
 import csfml
+
+import stages/stage
+import entities/enemy
 
 type Arena* = ref object
   boundary*: Boundary
@@ -13,6 +16,8 @@ type Arena* = ref object
   showFightText: bool
   showContinueText: bool
 
+  enemies: seq[Enemy]
+  
   # If player is in an arena
   active*: bool
   # Whether or not enemies will attack you
@@ -42,7 +47,18 @@ proc newArena*(boundary: Boundary, font: Font): Arena =
     done: false
   )
 
+proc checkCompleted*(self: Arena): bool =
+  # checks if all monsters defeated
+  return all(self.enemies, proc (e: Enemy): bool = return e.isDead)
+  # -> scene sets sidescrolling = true until next region X coordinate detected
+
 proc update*(self: Arena, dt: Duration) =
+  if not self.done:
+    let completed = self.checkCompleted()
+    if completed:
+      self.showContinueText = true
+      self.done = true
+  
   if self.showFightText:
     self.arenaModeTextTimer += dt
     if self.arenaModeTextTimer >= self.arenaModeTextDuration:
@@ -66,13 +82,16 @@ proc draw*(self: Arena, window: RenderWindow, view: View) =
     self.continueText.position = vec2(view.center.x - cfloat(self.continueText.globalBounds.width/2), view.center.y - cfloat(self.continueText.globalBounds.height/2))
     window.draw(self.continueText)
 
-# checkCompleted() = checks if all trashcans eaten(?), monsters defeated
-# -> scene sets sidescrolling = true until next region X coordinate detected
-
+proc addEnemy*(self: Arena, enemy: Enemy) =
+  self.enemies.add(enemy)
+    
 proc activate*(self: Arena) =
   self.started = true
   self.showFightText = true
   self.arenaModeTextTimer = initDuration(seconds=0)
+  for enemy in self.enemies:
+    # Activate aggression
+    enemy.aggression = true
 
 proc withinBounds*(self: Arena, coords: Vector2f): bool =
   # if within bounds, sidescrolling stops

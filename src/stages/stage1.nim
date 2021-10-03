@@ -73,10 +73,6 @@ proc load*(self: Stage1) =
   self.background.scale = vec2(1, 1)
   self.background.position = vec2(0, 0)
 
-  let arB: Boundary = (left: cint(600), right: cint(1880), top: cint(-1), bottom: cint(-1))
-  let arena1 = newArena(arB, self.font)
-  self.arenas.add(arena1)
-
   # TODO: maybe do something like Scene.spawn(entityKind) ??
   self.player = newPlayer(self.assetLoader)
 
@@ -103,6 +99,14 @@ proc load*(self: Stage1) =
     self.entities.add(Entity(rat))
     ratPos += 150
 
+  let arB: Boundary = (left: cint(600), right: cint(1880), top: cint(-1), bottom: cint(-1))
+  let arena1 = newArena(arB, self.font)
+  self.arenas.add(arena1)
+
+  for entity in self.entities:
+    if entity of Enemy and arena1.withinBounds(entity.sprite.position):
+      arena1.addEnemy(Enemy(entity))
+    
   var trashPos = 200
   for trash in trashBins:
     trash.sprite.position = vec2(trashPos, 300)
@@ -141,10 +145,6 @@ proc update*(self: Stage1, window: RenderWindow) =
     # TODO fix issue where enemies wont attack you if bounds aren't reached.
     # maybe the enemies should walk out from the right side
     self.currentArena.activate()
-    for entity in self.entities:
-      # Activate aggression
-      if entity of Enemy and self.currentArena.withinBounds(entity.sprite.position):
-        Enemy(entity).aggression = true
 
   elif not self.currentArena.active and self.player.sprite.position.x > self.view.center.x-300:
     self.sidescrolling = true
