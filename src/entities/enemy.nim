@@ -14,6 +14,7 @@ type
     # fuck optimization, reference the player for now
     player*: Entity
 
+    aggression*: bool
     attacking*: bool
     attackTimer*: Duration
     attackSpeed: Duration
@@ -28,7 +29,7 @@ proc getRatAssets*(loader: AssetLoader): ImageAsset =
   return loader.newImageAsset(ratImg)
 
 proc newRat*(sprite: Sprite, player: Entity): Rat =
-  result = Rat(player: player, health: 10, strength: 1, speed: 4, direction: vec2(0.0, 0.0), directionLag: initDuration(seconds = 1), directionTimer: initDuration(seconds = 0), walking: false, attacking: false, attackTimer: initDuration(seconds = 0), attackSpeed: initDuration(seconds=1))
+  result = Rat(player: player, health: 10, strength: 1, speed: 4, direction: vec2(0.0, 0.0), directionLag: initDuration(seconds = 1), directionTimer: initDuration(seconds = 0), walking: false, aggression: false, attacking: false, attackTimer: initDuration(seconds = 0), attackSpeed: initDuration(seconds=1))
   initEntity(result, sprite)
 
 proc attack*(self: Enemy) =
@@ -47,14 +48,14 @@ proc attack*(self: Enemy) =
   self.attacking = false
   
 method update*(self: Rat, dt: times.Duration) =
-  if not self.attacking:
+  if not self.attacking and self.aggression:
     self.walking = true
 
   if self.intersects(self.player):
     self.attacking = true
     self.walking = false
 
-  if self.attacking:
+  if self.attacking and self.aggression:
     self.attackTimer += dt
     if self.attackTimer >= self.attackSpeed:
       self.attack()

@@ -43,7 +43,7 @@ type
     sideScrolling: bool    # gameHud: GameHud
 
 proc newStage1*(window: RenderWindow): Stage1 =
-  let boundary: Boundary = (cint(10), cint(2000), cint(300), cint(0))
+  let boundary: Boundary = (cint(10), cint(3000), cint(300), cint(0))
   result = Stage1(boundary: boundary, isGameOver: false, sideScrolling: false, currentArena: Arena(active: false), currentArenaIdx: 0)
 
   initScene(
@@ -93,10 +93,11 @@ proc load*(self: Stage1) =
 
   let ratAsset = self.assetLoader.getRatAssets()
   let rats: seq[Rat] = @[
-    # newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
-    # newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity)
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity)
   ]
-  var ratPos = 200
+  var ratPos = 1200
   for rat in rats:
     rat.sprite.position = vec2(ratPos, 600)
     self.entities.add(Entity(rat))
@@ -136,7 +137,14 @@ proc update*(self: Stage1, window: RenderWindow) =
   # Once the camera hits the right boundary of the current arena, activate the arena
   if self.currentArena.active and not self.currentArena.started and viewRightSide >= float(self.currentArena.boundary.right):
     self.sidescrolling = false
+
+    # TODO fix issue where enemies wont attack you if bounds aren't reached.
+    # maybe the enemies should walk out from the right side
     self.currentArena.activate()
+    for entity in self.entities:
+      # Activate aggression
+      if entity of Enemy and self.currentArena.withinBounds(entity.sprite.position):
+        Enemy(entity).aggression = true
 
   elif not self.currentArena.active and self.player.sprite.position.x > self.view.center.x-300:
     self.sidescrolling = true
@@ -150,6 +158,9 @@ proc update*(self: Stage1, window: RenderWindow) =
     self.currentArena.update(dt)
 
   # Player boundaries
+
+  # TODO add arena boundaries if arena active
+
   # left boundary
   if self.player.sprite.position.x < (cfloat(self.boundary.left) + cfloat(self.player.sprite.scaledSize.x/2)):
     self.player.sprite.position = vec2(cfloat(self.boundary.left) + cfloat(self.player.sprite.scaledSize.x/2), self.player.sprite.position.y)
