@@ -125,6 +125,17 @@ proc load*(self: Stage1) =
   ticka.sprite.position = vec2(tickPos, 300)
   self.entities.add(ticka)
 
+  ticks = @[
+    newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity),
+    newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity),
+    newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity)
+  ]
+  tickPos = 2600
+  for tick in ticks:
+    tick.sprite.position = vec2(tickPos, 750)
+    self.entities.add(Entity(tick))
+    tickPos += 300
+  
   let ratAsset = self.assetLoader.getRatAssets()
   var rats: seq[Rat] = @[
 #    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
@@ -152,13 +163,25 @@ proc load*(self: Stage1) =
     
   rats = @[
     newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
   ]
   ratPos = 4000
-  for rat in rats:
-    rat.sprite.position = vec2(ratPos, 750)
-    self.entities.add(Entity(rat))
-    ratPos += 200
-    
+  rats[0].sprite.position = vec2(ratPos, 750)
+  self.entities.add(Entity(rats[0]))
+  ratPos += 300
+  rats[1].sprite.position = vec2(ratPos, 750)
+  self.entities.add(Entity(rats[1]))
+
+  ratPos -= 200
+  rats[2].sprite.position = vec2(ratPos, 300)
+  self.entities.add(Entity(rats[2]))
+
+  ratPos += 50
+  rats[3].sprite.position = vec2(ratPos, 340)
+  self.entities.add(Entity(rats[3]))
+  
   let arB1: Boundary = (left: cint(600), right: cint(1880), top: cint(-1), bottom: cint(-1))
   let arena1 = newArena(arB1, self.font)
   self.arenas.add(arena1)

@@ -33,6 +33,8 @@ type
     attackSpeed: Duration
     eatSpeed: Duration
 
+    playDeadTimer: Duration
+
     attackTimer: Duration
     eatTimer: Duration
     stabilityTimer: Duration
@@ -45,7 +47,7 @@ proc newPlayer*(loader: AssetLoader): Player =
   let playDeadAsset = loader.newImageAsset(opossumPlayDeadImg)
   let sprite = loader.newSprite(standAsset)
 
-  result = Player(standTexture: standAsset.texture, playDeadTexture: playDeadAsset.texture, health: 100, stability: 500, strength: 50, speed: 13, triggeredAction: false, walking: false, playingDead: false, attackSpeed: initDuration(milliseconds=750), eatSpeed: initDuration(seconds=2), attackTimer: initDuration(seconds=0), eatTimer: initDuration(seconds=0), stabilityTimer: initDuration(seconds=0), stabilityLossSpeed: initDuration(seconds=1))
+  result = Player(standTexture: standAsset.texture, playDeadTexture: playDeadAsset.texture, health: 100, stability: 100, strength: 5, speed: 3, triggeredAction: false, walking: false, playingDead: false, attackSpeed: initDuration(milliseconds=750), eatSpeed: initDuration(seconds=2), attackTimer: initDuration(seconds=0), eatTimer: initDuration(seconds=0), stabilityTimer: initDuration(seconds=0), stabilityLossSpeed: initDuration(seconds=1), playDeadTimer: initDuration(milliseconds=0))
   initEntity(result, sprite)
 
 proc addHealth(self: Player, health: int) =
@@ -73,12 +75,16 @@ proc eatTrash*(self: Player, trash: Trash, dt: Duration) =
     self.eating = false
 
 proc playDead*(self: Player, dt: Duration) =
-  self.attacking = false
-  self.walking = false
-  self.stability -= 1
-  # if timer is 0
-  self.sprite.setTexture(self.playDeadTexture, true)
-  # TODO when timer reach duration, change back to standing
+  if self.playDeadTimer == initDuration(seconds=0):
+    self.attacking = false
+    self.walking = false
+    self.sprite.setTexture(self.playDeadTexture, true)
+    
+  self.playDeadTimer += dt
+
+  if self.playDeadTimer >= initDuration(milliseconds=500):
+    self.stability -= 1
+    self.playDeadTimer = initDuration(seconds=0)
 
 proc attack*(self: Player, trashBin: TrashBin, dt: Duration) =
   if trashBin.isEmpty:
@@ -256,6 +262,7 @@ proc handleActionEvents*(self: Player, event: Event) =
     of KeyCode.X:
       self.playingDead = false
       self.sprite.setTexture(self.standTexture, true)
+      self.playDeadTimer = initDuration(seconds=0)
     of KeyCode.Space:
       self.triggeredAction = false
     else: discard
