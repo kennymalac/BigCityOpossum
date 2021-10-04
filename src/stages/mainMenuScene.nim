@@ -17,7 +17,7 @@ type
     background: Sprite
     gameTitle: Sprite
     soundRegistry: SoundRegistry
-#    menuMusic: Sound
+    menuMusic: Sound
     mainMenu: MainMenu
     currentCursor: GameCursor
     clickerCursor: GameCursor
@@ -28,7 +28,7 @@ type
 
 proc initCursors*(self: MainMenuScene) =
   proc newCursor(variant: string = "", location: string = ""): GameCursor = newGameCursor(self.assetLoader, variant, location)
-  self.clickerCursor = newCursor("clicker", "cursor-clicker-1.png")
+  self.clickerCursor = newCursor("clicker", "headcursor1.png")
   self.currentCursor = self.clickerCursor
 
 proc newMainMenuScene*(window: RenderWindow, doNewScene: proc (scene: Scene) {.closure.}): MainMenuScene =
@@ -43,15 +43,16 @@ proc newMainMenuScene*(window: RenderWindow, doNewScene: proc (scene: Scene) {.c
   )
 
   result.initCursors()
-#  result.soundRegistry = newSoundRegistry(result.assetLoader)
-#  result.menuMusic = result.soundRegistry.getSound(MainMenuMusic)
+  result.soundRegistry = newSoundRegistry(result.assetLoader)
+  result.soundRegistry.registerSound("mainMenu", joinPath("music", "OpeningMenu.ogg"))
+  result.menuMusic = result.soundRegistry.getSound("mainMenu")
 
   result.currentCursor = result.clickerCursor
 
 
 proc load*(self: MainMenuScene, window: RenderWindow) =
-  #self.menuMusic.loop = true
-  #self.menuMusic.play()
+  self.menuMusic.loop = true
+  self.menuMusic.play()
   self.background = self.assetLoader.newSprite(
      self.assetLoader.newImageAsset("menu-background_1-1.png")
   )
@@ -111,7 +112,7 @@ method handleEvent*(self: MainMenuScene, window: RenderWindow, event: Event) =
 
 proc update*(self: MainMenuScene, window: RenderWindow) =
   if self.startedGame:
-    # self.menuMusic.stop()
+    self.menuMusic.stop()
     self.doNewScene(newStage1(window))
     self.startedGame = false
     return

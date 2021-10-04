@@ -11,7 +11,7 @@ type SoundRegistry* = ref object
 proc newSoundRegistry*(assetLoader: AssetLoader): SoundRegistry =
   result = SoundRegistry(registry: newTable[string, SoundAsset](), assetLoader: assetLoader)
 
-proc registerSound*(self: SoundRegistry, kind: string, location: string): Sound =
+proc registerSound*(self: SoundRegistry, kind: string, location: string) =
   self.registry[kind] = self.assetLoader.newSoundAsset(kind, location)
 
 proc getSound*(self: SoundRegistry, kind: string): Sound =
