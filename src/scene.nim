@@ -6,7 +6,7 @@ randomize()
 import csfml #, csfml/ext
 
 import entities/entity
-#import entities/enemy
+import entities/enemy
 import entities/things
 import assetLoader
 
@@ -69,7 +69,10 @@ proc update*(self: Scene, window: RenderWindow): Duration =
   var addedEntities: seq[Entity] = @[]
   
   for i, entity in self.entities:
-    entity.update(dt)
+    if entity of Racoon:
+      Racoon(entity).update(dt, self.entities)
+    else:
+      entity.update(dt)
     entity.updateRectPosition()
     if entity of TrashBin:
       if TrashBin(entity).spawningTrash:

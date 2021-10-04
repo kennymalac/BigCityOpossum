@@ -94,14 +94,26 @@ proc load*(self: Stage1) =
   let trashBins = @[
     newTrashBin(self.assetLoader.newSprite(binAssets[0])),
     newTrashBin(self.assetLoader.newSprite(binAssets[0])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[0])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[0])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[0])),
     newTrashBin(self.assetLoader.newSprite(binAssets[0]))
   ]
-  var trashPos = 450
-  for t in trashBins:
-    t.sprite.position = vec2(trashPos, 300)
-    self.entities.add(Entity(t))
-    trashPos += 400
 
+  trashBins[0].sprite.position = vec2(912, 245)
+  self.entities.add(Entity(trashBins[0]))
+  trashBins[1].sprite.position = vec2(1550, 580)
+  self.entities.add(Entity(trashBins[1]))
+  trashBins[2].sprite.position = vec2(1550, 225)
+  self.entities.add(Entity(trashBins[2]))
+  trashBins[3].sprite.position = vec2(3400, 225)
+  self.entities.add(Entity(trashBins[3]))
+  trashBins[4].sprite.position = vec2(3400, 580)
+  self.entities.add(Entity(trashBins[4]))
+  trashBins[5].sprite.position = vec2(5400, 225)
+  self.entities.add(Entity(trashBins[5]))
+  
+  
   # progression goes:
     # 4 ticks
     # 4 ticks + 2 rats
@@ -130,7 +142,7 @@ proc load*(self: Stage1) =
     newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity),
     newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity)
   ]
-  tickPos = 2600
+  tickPos = 2800
   for tick in ticks:
     tick.sprite.position = vec2(tickPos, 750)
     self.entities.add(Entity(tick))
@@ -181,6 +193,7 @@ proc load*(self: Stage1) =
   ratPos += 50
   rats[3].sprite.position = vec2(ratPos, 340)
   self.entities.add(Entity(rats[3]))
+
   
   let arB1: Boundary = (left: cint(600), right: cint(1880), top: cint(-1), bottom: cint(-1))
   let arena1 = newArena(arB1, self.font)
@@ -237,6 +250,17 @@ proc loadSubway*(self: Stage1) =
     # 4 ticks + 6 rats + 1 racoon
     # 4 ticks + 8 rats + 2 racoons
     # ???
+  let racoonAsset = self.assetLoader.getRacoonAssets()
+  var racoons: seq[Racoon] = @[
+    newRacoon(self.assetLoader.newSprite(racoonAsset), self.player.Entity),
+  ]
+  var racoonPos = 1200
+  for racoon in racoons:
+    racoon.sprite.position = vec2(racoonPos, 600)
+    self.entities.add(Entity(racoon))
+    racoonPos += 50
+
+
   
   let binAssets = self.assetLoader.getTrashBinAssets()
   let trashBins = @[
