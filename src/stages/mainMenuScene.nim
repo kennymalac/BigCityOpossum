@@ -57,7 +57,7 @@ proc load*(self: MainMenuScene, window: RenderWindow) =
      self.assetLoader.newImageAsset("menu-background.png")
   )
   self.gameTitle = self.assetLoader.newSprite(
-     self.assetLoader.newImageAsset("game-logo_1-1.png")
+     self.assetLoader.newImageAsset("logo.png")
   )
   #echo "tex size: ", self.background.texture.size.x, " ", self.background.texture.size.y
 

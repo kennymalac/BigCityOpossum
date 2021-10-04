@@ -16,7 +16,7 @@ proc main(windowConfig: WindowConfig) =
   var currentScene: Scene = nil
   var newScene: Option[Scene] = none(Scene)
 
-  let gameTitle: string = "Opossum Fun"
+  let gameTitle: string = "Big City Opossum"
 
   var doNewScene = proc (scene: Scene) {.closure.} =
     echo "newScene\n"

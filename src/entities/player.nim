@@ -1,11 +1,13 @@
+import os
 import options
 import times
 import strformat
 
-import csfml
+import csfml, csfml/audio
 
 import entity
 import ../assetLoader
+import ../soundRegistry
 import ../animation
 import things
 import enemy
@@ -13,6 +15,10 @@ import enemy
 # let opossumWalkImages = @["walk-1.png", "walk-2.png"]
 let opossumImg = "opossum3.png"
 let opossumPlayDeadImg = "opossum-playdead.png"
+#let opossumBiteImg = "opossum-bite.png"
+
+let attackSoundFile = joinPath("fx", "OpposumAttack.ogg")
+let eatSoundFile = joinPath("fx", "Eating.ogg")
 
 type
   Player* = ref object of Entity
@@ -33,6 +39,9 @@ type
     attackSpeed: Duration
     eatSpeed: Duration
 
+    eatSound: Sound
+    attackSound: Sound
+
     playDeadTimer: Duration
 
     attackTimer: Duration
@@ -42,12 +51,17 @@ type
 
     trajectory*: Vector2f
 
-proc newPlayer*(loader: AssetLoader): Player =
+proc newPlayer*(loader: AssetLoader, soundRegistry: SoundRegistry): Player =
   let standAsset = loader.newImageAsset(opossumImg)
   let playDeadAsset = loader.newImageAsset(opossumPlayDeadImg)
   let sprite = loader.newSprite(standAsset)
+  soundRegistry.registerSound("playerEat", eatSoundFile)
+  soundRegistry.registerSound("playerAttack", attackSoundFile)
 
   result = Player(standTexture: standAsset.texture, playDeadTexture: playDeadAsset.texture, health: 100, stability: 100, strength: 5, speed: 3, triggeredAction: false, walking: false, playingDead: false, attackSpeed: initDuration(milliseconds=750), eatSpeed: initDuration(seconds=2), attackTimer: initDuration(seconds=0), eatTimer: initDuration(seconds=0), stabilityTimer: initDuration(seconds=0), stabilityLossSpeed: initDuration(seconds=1), playDeadTimer: initDuration(milliseconds=0))
+
+  result.eatSound = soundRegistry.getSound("playerEat")
+  result.attackSound = soundRegistry.getSound("playerAttack")
   initEntity(result, sprite, 3)
 
 
@@ -65,7 +79,7 @@ proc eatTrash*(self: Player, trash: Trash, dt: Duration) =
   #if trash.isEmpty:
   #  self.eating = false
   #  return
-
+  self.eatSound.play()
   trash.health -= self.strength
 
   if trash.health <= 0:
@@ -95,6 +109,7 @@ proc attack*(self: Player, trashBin: TrashBin, dt: Duration) =
     self.attacking = false
     return
 
+  self.attackSound.play()
   # TODO use attack animation
   trashBin.health -= self.strength
   echo(fmt"Attacked trashBin for {self.strength} damage")
@@ -115,6 +130,8 @@ proc attack*(self: Player, enemy: Enemy, dt: Duration) =
     self.attacking = false
     return
 
+  self.attackSound.play()
+  
   # TODO use attack animation
   enemy.health -= self.strength
   echo(fmt"Attacked enemy for {self.strength} damage")
