@@ -51,7 +51,7 @@ type
 
 proc newStage1*(window: RenderWindow): Stage1 =
   let boundary: Boundary = (cint(10), cint(6400), cint(300), cint(0))
-  result = Stage1(boundary: boundary, isGameOver: false, sideScrolling: false, currentArena: Arena(active: false, done: false), currentArenaIdx: -1, currentStage: 2, windowSize: window.size)
+  result = Stage1(boundary: boundary, isGameOver: false, sideScrolling: false, currentArena: Arena(active: false, done: false), currentArenaIdx: -1, currentStage: 1, windowSize: window.size)
 
   initScene(
     result,
@@ -244,7 +244,7 @@ proc loadSubway*(self: Stage1, window: RenderWindow) =
   self.gameMusic.loop = true
   self.gameMusic.play()
   self.background = self.assetLoader.newSprite(
-    self.assetLoader.newImageAsset("background-test2.png")
+    self.assetLoader.newImageAsset("subway.png")
   )
   self.background.scale = vec2(1, 1)
   self.background.position = vec2(0, 0)
@@ -511,7 +511,7 @@ proc loadCentralPark*(self: Stage1, window: RenderWindow) =
   self.entities.add(Entity(racoons[1]))
   racoonPos += 100
     
-  let arB1: Boundary = (left: cint(600), right: cint(1880), top: cint(-1), bottom: cint(-1))
+  let arB1: Boundary = (left: cint(600), right: cint(1680), top: cint(-1), bottom: cint(-1))
   let arena1 = newArena(arB1, self.font)
   self.arenas.add(arena1)
 
