@@ -12,13 +12,18 @@ import enemy
 
 # let opossumWalkImages = @["walk-1.png", "walk-2.png"]
 let opossumImg = "opossum3.png"
+let opossumPlayDeadImg = "opossum-playdead.png"
 
 type
   Player* = ref object of Entity
+    standTexture: Texture
+    playDeadTexture: Texture
+
     stability*: int
     strength*: int
     walking*: bool
     attacking*: bool
+    playingDead*: bool
     eating*: bool
     eatTarget*: Option[Trash]
     attackTarget*: Option[Enemy]
@@ -37,8 +42,11 @@ type
     trajectory*: Vector2f
 
 proc newPlayer*(loader: AssetLoader): Player =
-  let sprite = loader.newSprite(loader.newImageAsset(opossumImg))
-  result = Player(health: 100, stability: 50, strength: 5, speed: 3, triggeredAction: false, walking: false, attackSpeed: initDuration(seconds=1), eatSpeed: initDuration(seconds=2), attackTimer: initDuration(seconds=0), eatTimer: initDuration(seconds=0), stabilityTimer: initDuration(seconds=0), stabilityLossSpeed: initDuration(seconds=1))
+  let standAsset = loader.newImageAsset(opossumImg)
+  let playDeadAsset = loader.newImageAsset(opossumPlayDeadImg)
+  let sprite = loader.newSprite(standAsset)
+
+  result = Player(standTexture: standAsset.texture, playDeadTexture: playDeadAsset.texture, health: 100, stability: 50, strength: 5, speed: 3, triggeredAction: false, walking: false, playingDead: false, attackSpeed: initDuration(seconds=1), eatSpeed: initDuration(seconds=2), attackTimer: initDuration(seconds=0), eatTimer: initDuration(seconds=0), stabilityTimer: initDuration(seconds=0), stabilityLossSpeed: initDuration(seconds=1))
   initEntity(result, sprite)
 
 proc addHealth(self: Player, health: int) =
@@ -49,22 +57,27 @@ proc minusHealth(self: Player, health: int) =
 
 proc eatTrash*(self: Player, trash: Trash, dt: Duration) =
   # TODO use eating animation
-  if trash.isEmpty:
-    self.eating = false
-    return
+  #if trash.isEmpty:
+  #  self.eating = false
+  #  return
 
   trash.health -= self.strength
 
   if trash.health <= 0:
-    trash.isEmpty = true
-    # For now make the trash disapper before we have empty trash sprites
-    trash.isDead = true
+    #trash.isEmpty = true
     self.addHealth(5)
 
   # Reset timer
   self.eatTimer = initDuration(seconds=0)
   if not self.triggeredAction:
     self.eating = false
+
+proc playDead*(self: Player, dt: Duration) =
+  self.attacking = false
+  self.walking = false
+  # if timer is 0
+  self.sprite.setTexture(self.playDeadTexture, true)
+  # TODO when timer reach duration, change back to standing
 
 proc attack*(self: Player, enemy: Enemy, dt: Duration) =
   if enemy.isDead:
@@ -113,6 +126,9 @@ method update*(self: Player, dt: times.Duration) =
     # Can't walk while eating or attacking
     self.walking = false
     # Scene needs to call triggerPlayerAction!!
+
+  if self.playingDead:
+    self.playDead(dt)
 
   self.stabilityTimer += dt
   if self.stabilityTimer >= self.stabilityLossSpeed:
@@ -181,6 +197,8 @@ proc handleActionEvents*(self: Player, event: Event) =
     case event.key.code
     of KeyCode.Space:
       self.triggeredAction = true
+    of KeyCode.X:
+      self.playingDead = true
     else: discard
   of EventType.KeyReleased:
     case event.key.code:
