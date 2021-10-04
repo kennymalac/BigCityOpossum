@@ -42,12 +42,16 @@ type
     currentArenaIdx: int
     currentArena: Arena
 
+    windowSize: Vector2i
+    # TODO separte each stage into its own object
+    currentStage: int
+
     # Side scrolling - if the game is following the charcter or not
     sideScrolling: bool    # gameHud: GameHud
 
 proc newStage1*(window: RenderWindow): Stage1 =
   let boundary: Boundary = (cint(10), cint(6400), cint(300), cint(0))
-  result = Stage1(boundary: boundary, isGameOver: false, sideScrolling: false, currentArena: Arena(active: false, done: false), currentArenaIdx: -1)
+  result = Stage1(boundary: boundary, isGameOver: false, sideScrolling: false, currentArena: Arena(active: false, done: false), currentArenaIdx: -1, currentStage: 1, windowSize: window.size)
 
   initScene(
     result,
@@ -94,7 +98,7 @@ proc load*(self: Stage1) =
     t.sprite.position = vec2(trashPos, 300)
     self.entities.add(Entity(t))
     trashPos += 400
-  
+
   let ratAsset = self.assetLoader.getRatAssets()
   var rats: seq[Rat] = @[
 #    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
@@ -136,7 +140,7 @@ proc load*(self: Stage1) =
   let arB3: Boundary = (left: cint(3400), right: cint(4680), top: cint(-1), bottom: cint(-1))
   let arena3 = newArena(arB3, self.font)
   self.arenas.add(arena3)
-  
+
   for entity in self.entities:
     if entity of Enemy:
       if arena1.withinBounds(entity.sprite.position):
@@ -145,7 +149,68 @@ proc load*(self: Stage1) =
         arena2.addEnemy(Enemy(entity))
       elif arena3.withinBounds(entity.sprite.position):
         arena3.addEnemy(Enemy(entity))
-    
+
+
+# TODO move this to separate file, combining because of deadline
+
+proc resetStage*(self: Stage1) =
+  self.entities = @[]
+  self.arenas = @[]
+  self.view = newView(getOrigin(self.windowSize), self.windowSize)
+
+  self.currentArena = Arena(active: false, done: false)
+  self.sidescrolling = true
+
+proc loadSubway*(self: Stage1) =
+  echo("loading subway...")
+  self.resetStage()
+  self.player.sprite.position = vec2(200, 200)
+  self.entities.add(Entity(self.player))
+
+  self.title = "Stage 2 - Subway"
+
+  # self.gameMusic.loop = true
+  # self.gameMusic.play()
+  self.background = self.assetLoader.newSprite(
+    self.assetLoader.newImageAsset("background-test2.png")
+  )
+  self.background.scale = vec2(1, 1)
+  self.background.position = vec2(0, 0)
+
+
+  let binAssets = self.assetLoader.getTrashBinAssets()
+  let trashBins = @[
+    newTrashBin(self.assetLoader.newSprite(binAssets[0])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[0])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[0]))
+  ]
+  var trashPos = 450
+  for t in trashBins:
+    t.sprite.position = vec2(trashPos, 300)
+    self.entities.add(Entity(t))
+    trashPos += 400
+
+  let ratAsset = self.assetLoader.getRatAssets()
+  var rats: seq[Rat] = @[
+#    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity)
+  ]
+  var ratPos = 1200
+  for rat in rats:
+    rat.sprite.position = vec2(ratPos, 600)
+    self.entities.add(Entity(rat))
+    ratPos += 150
+
+  let arB1: Boundary = (left: cint(600), right: cint(1880), top: cint(-1), bottom: cint(-1))
+  let arena1 = newArena(arB1, self.font)
+  self.arenas.add(arena1)
+
+  for entity in self.entities:
+    if entity of Enemy:
+      if arena1.withinBounds(entity.sprite.position):
+        arena1.addEnemy(Enemy(entity))
+
 
 method handleEvent*(self: Stage1, window: RenderWindow, event: Event) =
   case event.kind
@@ -164,7 +229,7 @@ proc getBoundary(self: Stage1): Boundary =
     return self.currentArena.boundary
 
   return self.boundary
-  
+
 proc update*(self: Stage1, window: RenderWindow) =
   var lastPlayerCoords = self.player.sprite.position
   let dt = self.Scene.update(window)
@@ -190,7 +255,7 @@ proc update*(self: Stage1, window: RenderWindow) =
 
   if self.currentArena.active:
     self.currentArena.update(dt)
-    
+
   # If player is in left bounds of the next arena, make that arena the current arena
   elif not self.currentArena.started and self.currentArenaIdx < len(self.arenas)-1 and self.player.sprite.position.x >= float(self.arenas[self.currentArenaIdx + 1].boundary.left):
     self.currentArenaIdx += 1
@@ -238,6 +303,13 @@ proc update*(self: Stage1, window: RenderWindow) =
     self.isGameOver = true
 
   if self.isGameOver:
+    return
+
+  if self.currentStage == 1 and self.player.sprite.position.x >= 5980 and self.player.sprite.position.y < 680 and self.player.sprite.position.y > 500:
+    # Progress to next Stage
+    self.currentStage = 2
+    self.loadSubway()
+    window.view = self.view
     return
 
   if not self.currentArena.active and self.currentArena.done:

@@ -31,8 +31,8 @@ proc main(windowConfig: WindowConfig) =
   window.mouseCursorVisible = false
   while window.open:
     if newScene.isSome:
-      window.title = fmt"{gameTitle} - {currentScene.title}"
       currentScene = newScene.get()
+      window.title = fmt"{gameTitle} - {currentScene.title}"
       if currentScene of Stage1:
         Stage1(currentScene).load()
 

@@ -46,7 +46,7 @@ proc newPlayer*(loader: AssetLoader): Player =
   let playDeadAsset = loader.newImageAsset(opossumPlayDeadImg)
   let sprite = loader.newSprite(standAsset)
 
-  result = Player(standTexture: standAsset.texture, playDeadTexture: playDeadAsset.texture, health: 100, stability: 50, strength: 5, speed: 3, triggeredAction: false, walking: false, playingDead: false, attackSpeed: initDuration(seconds=1), eatSpeed: initDuration(seconds=2), attackTimer: initDuration(seconds=0), eatTimer: initDuration(seconds=0), stabilityTimer: initDuration(seconds=0), stabilityLossSpeed: initDuration(seconds=1))
+  result = Player(standTexture: standAsset.texture, playDeadTexture: playDeadAsset.texture, health: 100, stability: 500, strength: 50, speed: 13, triggeredAction: false, walking: false, playingDead: false, attackSpeed: initDuration(seconds=1), eatSpeed: initDuration(seconds=2), attackTimer: initDuration(seconds=0), eatTimer: initDuration(seconds=0), stabilityTimer: initDuration(seconds=0), stabilityLossSpeed: initDuration(seconds=1))
   initEntity(result, sprite)
 
 proc addHealth(self: Player, health: int) =
@@ -177,7 +177,7 @@ method update*(self: Player, dt: times.Duration) =
       self.stability -= 1
     else:
       # 0 stability means player slowly loses health
-      self.minusHealth(1)
+      self.minusHealth(2)
     self.stabilityTimer = initDuration(seconds=0)
 
   ############
