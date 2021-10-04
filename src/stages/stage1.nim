@@ -30,7 +30,7 @@ type
   Stage1* = ref object of Scene
     font: Font
     scoreText: Text
-    # gameMusic: Sound
+    gameMusic: Sound
     player: Player
     isGameOver: bool
     background: Sprite
@@ -61,7 +61,10 @@ proc newStage1*(window: RenderWindow): Stage1 =
   )
 
   result.soundRegistry = newSoundRegistry(result.assetLoader)
-  # result.gameMusic = result.soundRegistry.getSound(StageGameMusic)
+  result.soundRegistry.registerSound("city", joinPath("music", "BigCity.ogg"))
+  result.soundRegistry.registerSound("subway", joinPath("music", "Subway.ogg"))
+  result.soundRegistry.registerSound("centralPark", joinPath("music", "Central Park.ogg"))
+  result.gameMusic = result.soundRegistry.getSound("city")
 
   # result.enemySpawnTimer = initDuration(seconds = 0)
   # result.score = 0
@@ -71,8 +74,8 @@ proc newStage1*(window: RenderWindow): Stage1 =
   # result.scoreText.characterSize = 14
 
 proc load*(self: Stage1) =
-  # self.gameMusic.loop = true
-  # self.gameMusic.play()
+  self.gameMusic.loop = true
+  self.gameMusic.play()
   self.background = self.assetLoader.newSprite(
     self.assetLoader.newImageAsset("background-test.png")
   )
@@ -154,6 +157,7 @@ proc load*(self: Stage1) =
 # TODO move this to separate file, combining because of deadline
 
 proc resetStage*(self: Stage1) =
+  self.gameMusic.stop()  
   self.entities = @[]
   self.arenas = @[]
   self.view = newView(getOrigin(self.windowSize), self.windowSize)
@@ -164,13 +168,14 @@ proc resetStage*(self: Stage1) =
 proc loadSubway*(self: Stage1) =
   echo("loading subway...")
   self.resetStage()
-  self.player.sprite.position = vec2(200, 200)
+  self.player.sprite.position = vec2(160, 300)
   self.entities.add(Entity(self.player))
 
   self.title = "Stage 2 - Subway"
-
-  # self.gameMusic.loop = true
-  # self.gameMusic.play()
+  
+  self.gameMusic = self.soundRegistry.getSound("subway")
+  self.gameMusic.loop = true
+  self.gameMusic.play()
   self.background = self.assetLoader.newSprite(
     self.assetLoader.newImageAsset("background-test2.png")
   )
@@ -211,6 +216,56 @@ proc loadSubway*(self: Stage1) =
       if arena1.withinBounds(entity.sprite.position):
         arena1.addEnemy(Enemy(entity))
 
+proc loadCentralPark*(self: Stage1) =
+  echo("loading central park...")
+  self.resetStage()
+  self.player.sprite.position = vec2(180, 480)
+  self.entities.add(Entity(self.player))
+
+  self.title = "Stage 3 - Central Park"
+
+  self.gameMusic = self.soundRegistry.getSound("centralPark")
+  self.gameMusic.loop = true
+  self.gameMusic.play()
+  self.background = self.assetLoader.newSprite(
+    self.assetLoader.newImageAsset("background-test3.png")
+  )
+  self.background.scale = vec2(1, 1)
+  self.background.position = vec2(0, 0)
+
+
+  let binAssets = self.assetLoader.getTrashBinAssets()
+  let trashBins = @[
+    newTrashBin(self.assetLoader.newSprite(binAssets[0])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[0])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[0]))
+  ]
+  var trashPos = 450
+  for t in trashBins:
+    t.sprite.position = vec2(trashPos, 300)
+    self.entities.add(Entity(t))
+    trashPos += 400
+
+  let ratAsset = self.assetLoader.getRatAssets()
+  var rats: seq[Rat] = @[
+#    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity)
+  ]
+  var ratPos = 1200
+  for rat in rats:
+    rat.sprite.position = vec2(ratPos, 600)
+    self.entities.add(Entity(rat))
+    ratPos += 150
+
+  let arB1: Boundary = (left: cint(600), right: cint(1880), top: cint(-1), bottom: cint(-1))
+  let arena1 = newArena(arB1, self.font)
+  self.arenas.add(arena1)
+
+  for entity in self.entities:
+    if entity of Enemy:
+      if arena1.withinBounds(entity.sprite.position):
+        arena1.addEnemy(Enemy(entity))
 
 method handleEvent*(self: Stage1, window: RenderWindow, event: Event) =
   case event.kind
@@ -309,6 +364,13 @@ proc update*(self: Stage1, window: RenderWindow) =
     # Progress to next Stage
     self.currentStage = 2
     self.loadSubway()
+    window.view = self.view
+    return
+
+  if self.currentStage == 2 and self.player.sprite.position.x >= 6000 and self.player.sprite.position.y < 700 and self.player.sprite.position.y > 420:
+    # Progress to next Stage
+    self.currentStage = 3
+    self.loadCentralPark()
     window.view = self.view
     return
 
