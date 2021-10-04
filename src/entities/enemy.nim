@@ -56,11 +56,11 @@ proc newTick*(sprite: Sprite, player: Entity): Tick =
   initEntity(result, sprite, -5)
 
 proc newRat*(sprite: Sprite, player: Entity): Rat =
-  result = Rat(player: player, health: 15, strength: 4, speed: 4, direction: vec2(0.0, 0.0), directionLag: initDuration(seconds = 1), directionTimer: initDuration(seconds = 0), walking: false, aggression: false, attacking: false, attackTimer: initDuration(seconds = 0), attackSpeed: initDuration(seconds=1))
+  result = Rat(player: player, health: 15, strength: 3, speed: 4, direction: vec2(0.0, 0.0), directionLag: initDuration(seconds = 1), directionTimer: initDuration(seconds = 0), walking: false, aggression: false, attacking: false, attackTimer: initDuration(seconds = 0), attackSpeed: initDuration(seconds=1))
   initEntity(result, sprite)
 
 proc newRacoon*(sprite: Sprite, player: Entity): Racoon =
-  result = Racoon(player: player, health: 35, strength: 7, speed: 2, direction: vec2(0.0, 0.0), directionLag: initDuration(seconds = 1), directionTimer: initDuration(seconds = 0), walking: false, aggression: false, attacking: false, attackTimer: initDuration(seconds = 0), attackSpeed: initDuration(milliseconds=1500))
+  result = Racoon(player: player, health: 35, strength: 5, speed: 2, direction: vec2(0.0, 0.0), directionLag: initDuration(seconds = 1), directionTimer: initDuration(seconds = 0), walking: false, aggression: false, attacking: false, attackTimer: initDuration(seconds = 0), attackSpeed: initDuration(milliseconds=1500))
   initEntity(result, sprite)
   
 proc attack*(self: Enemy) =
@@ -148,7 +148,7 @@ method update*(self: Racoon, dt: times.Duration, entities: seq[Entity]) =
   if not self.attacking and self.aggression:
     self.walking = true
 
-  if self.sprite.position.y > 800:
+  if self.sprite.position.y > 810:
     self.isDead = true
     
   if self.intersects(self.player) and not self.player.playingDead:

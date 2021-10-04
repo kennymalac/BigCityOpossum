@@ -51,7 +51,7 @@ type
 
 proc newStage1*(window: RenderWindow): Stage1 =
   let boundary: Boundary = (cint(10), cint(6400), cint(300), cint(0))
-  result = Stage1(boundary: boundary, isGameOver: false, sideScrolling: false, currentArena: Arena(active: false, done: false), currentArenaIdx: -1, currentStage: 1, windowSize: window.size)
+  result = Stage1(boundary: boundary, isGameOver: false, sideScrolling: false, currentArena: Arena(active: false, done: false), currentArenaIdx: -1, currentStage: 2, windowSize: window.size)
 
   initScene(
     result,
@@ -72,6 +72,8 @@ proc newStage1*(window: RenderWindow): Stage1 =
   # result.scoreText = newText("Score: ", result.font)
   # result.scoreText.font = result.font
   # result.scoreText.characterSize = 14
+
+  
 
 proc load*(self: Stage1) =
   self.gameMusic.loop = true
@@ -215,7 +217,7 @@ proc load*(self: Stage1) =
         arena2.addEnemy(Enemy(entity))
       elif arena3.withinBounds(entity.sprite.position):
         arena3.addEnemy(Enemy(entity))
-
+        
 
 # TODO move this to separate file, combining because of deadline
 
@@ -250,33 +252,40 @@ proc loadSubway*(self: Stage1) =
     # 4 ticks + 6 rats + 1 racoon
     # 4 ticks + 8 rats + 2 racoons
     # ???
-  let racoonAsset = self.assetLoader.getRacoonAssets()
-  var racoons: seq[Racoon] = @[
-    newRacoon(self.assetLoader.newSprite(racoonAsset), self.player.Entity),
-  ]
-  var racoonPos = 1200
-  for racoon in racoons:
-    racoon.sprite.position = vec2(racoonPos, 600)
-    self.entities.add(Entity(racoon))
-    racoonPos += 50
 
-
-  
   let binAssets = self.assetLoader.getTrashBinAssets()
   let trashBins = @[
-    newTrashBin(self.assetLoader.newSprite(binAssets[0])),
-    newTrashBin(self.assetLoader.newSprite(binAssets[0])),
-    newTrashBin(self.assetLoader.newSprite(binAssets[0]))
+    newTrashBin(self.assetLoader.newSprite(binAssets[1])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[1])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[1])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[1])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[1])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[1]))
   ]
-  var trashPos = 450
-  for t in trashBins:
-    t.sprite.position = vec2(trashPos, 300)
-    self.entities.add(Entity(t))
-    trashPos += 400
 
+  trashBins[0].sprite.position = vec2(912, 600)
+  self.entities.add(Entity(trashBins[0]))
+  trashBins[1].sprite.position = vec2(1550, 600)
+  self.entities.add(Entity(trashBins[1]))
+  trashBins[2].sprite.position = vec2(1550, 210)
+  self.entities.add(Entity(trashBins[2]))
+  trashBins[3].sprite.position = vec2(3400, 210)
+  self.entities.add(Entity(trashBins[3]))
+  trashBins[4].sprite.position = vec2(3400, 600)
+  self.entities.add(Entity(trashBins[4]))
+  trashBins[5].sprite.position = vec2(5400, 210)
+  self.entities.add(Entity(trashBins[5]))
+
+
+  let tickAsset = self.assetLoader.getTickAssets()
+  var tickPos = 1200
+  var ticka = newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity)
+  ticka.sprite.position = vec2(tickPos, 300)
+  self.entities.add(ticka)
+    
   let ratAsset = self.assetLoader.getRatAssets()
   var rats: seq[Rat] = @[
-#    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
     newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
     newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity)
   ]
@@ -286,14 +295,84 @@ proc loadSubway*(self: Stage1) =
     self.entities.add(Entity(rat))
     ratPos += 150
 
+  rats = @[
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity)
+  ]
+  ratPos = 3000
+  rats[0].sprite.position = vec2(ratPos, 750)
+  self.entities.add(Entity(rats[0]))
+  ratPos += 300
+  rats[1].sprite.position = vec2(ratPos, 750)
+  self.entities.add(Entity(rats[1]))
+
+  let racoonAsset = self.assetLoader.getRacoonAssets()
+  var racoons: seq[Racoon] = @[
+    newRacoon(self.assetLoader.newSprite(racoonAsset), self.player.Entity),
+  ]
+  var racoonPos = 3400
+  racoons[0].sprite.position = vec2(racoonPos, 400)
+  self.entities.add(Entity(racoons[0]))
+  racoonPos += 50
+
+  tickPos = 4800
+  ticka = newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity)
+  ticka.sprite.position = vec2(tickPos, 300)
+  self.entities.add(ticka)
+  tickPos = 5000
+  ticka = newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity)
+  ticka.sprite.position = vec2(tickPos, 300)
+  self.entities.add(ticka)
+  tickPos = 5100
+  ticka = newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity)
+  ticka.sprite.position = vec2(tickPos, 500)
+  self.entities.add(ticka)
+
+  rats = @[
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity)
+  ]
+  ratPos = 4800
+  rats[0].sprite.position = vec2(ratPos, 750)
+  self.entities.add(Entity(rats[0]))
+  ratPos += 300
+  rats[1].sprite.position = vec2(ratPos, 810)
+  self.entities.add(Entity(rats[1]))
+  ratPos -= 200
+  rats[2].sprite.position = vec2(ratPos, 810)
+  self.entities.add(Entity(rats[1]))
+  ratPos -= 200
+
+  racoons = @[
+    newRacoon(self.assetLoader.newSprite(racoonAsset), self.player.Entity),
+  ]
+  racoonPos = 5000
+  racoons[0].sprite.position = vec2(racoonPos, 600)
+  self.entities.add(Entity(racoons[0]))
+  racoonPos += 100
+    
   let arB1: Boundary = (left: cint(600), right: cint(1880), top: cint(-1), bottom: cint(-1))
   let arena1 = newArena(arB1, self.font)
   self.arenas.add(arena1)
+
+  let arB2: Boundary = (left: cint(2300), right: cint(3580), top: cint(-1), bottom: cint(-1))
+  let arena2 = newArena(arB2, self.font)
+  self.arenas.add(arena2)
+
+  let arB3: Boundary = (left: cint(4000), right: cint(5280), top: cint(-1), bottom: cint(-1))
+  let arena3 = newArena(arB3, self.font)
+  self.arenas.add(arena3)  
 
   for entity in self.entities:
     if entity of Enemy:
       if arena1.withinBounds(entity.sprite.position):
         arena1.addEnemy(Enemy(entity))
+      if arena2.withinBounds(entity.sprite.position):
+        arena2.addEnemy(Enemy(entity))
+      if arena3.withinBounds(entity.sprite.position):
+        arena3.addEnemy(Enemy(entity))
+        
 
 proc loadCentralPark*(self: Stage1) =
   echo("loading central park...")
@@ -321,19 +400,37 @@ proc loadCentralPark*(self: Stage1) =
   
   let binAssets = self.assetLoader.getTrashBinAssets()
   let trashBins = @[
-    newTrashBin(self.assetLoader.newSprite(binAssets[0])),
-    newTrashBin(self.assetLoader.newSprite(binAssets[0])),
-    newTrashBin(self.assetLoader.newSprite(binAssets[0]))
+    newTrashBin(self.assetLoader.newSprite(binAssets[1])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[1])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[1])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[1])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[1])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[1]))
   ]
-  var trashPos = 450
-  for t in trashBins:
-    t.sprite.position = vec2(trashPos, 300)
-    self.entities.add(Entity(t))
-    trashPos += 400
 
+  trashBins[0].sprite.position = vec2(912, 245)
+  self.entities.add(Entity(trashBins[0]))
+  trashBins[1].sprite.position = vec2(1550, 480)
+  self.entities.add(Entity(trashBins[1]))
+  trashBins[2].sprite.position = vec2(1550, 225)
+  self.entities.add(Entity(trashBins[2]))
+  trashBins[3].sprite.position = vec2(3400, 225)
+  self.entities.add(Entity(trashBins[3]))
+  trashBins[4].sprite.position = vec2(3400, 480)
+  self.entities.add(Entity(trashBins[4]))
+  trashBins[5].sprite.position = vec2(5400, 225)
+  self.entities.add(Entity(trashBins[5]))
+
+
+  let tickAsset = self.assetLoader.getTickAssets()
+  var tickPos = 1200
+  var ticka = newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity)
+  ticka.sprite.position = vec2(tickPos, 300)
+  self.entities.add(ticka)
+    
   let ratAsset = self.assetLoader.getRatAssets()
   var rats: seq[Rat] = @[
-#    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
     newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
     newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity)
   ]
@@ -343,9 +440,48 @@ proc loadCentralPark*(self: Stage1) =
     self.entities.add(Entity(rat))
     ratPos += 150
 
+  rats = @[
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
+    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity)
+  ]
+  ratPos = 3000
+  rats[0].sprite.position = vec2(ratPos, 750)
+  self.entities.add(Entity(rats[0]))
+  ratPos += 300
+  rats[1].sprite.position = vec2(ratPos, 750)
+  self.entities.add(Entity(rats[1]))
+  ratPos -= 200
+  rats[2].sprite.position = vec2(ratPos, 300)
+  self.entities.add(Entity(rats[2]))
+
+  let racoonAsset = self.assetLoader.getRacoonAssets()
+  var racoons: seq[Racoon] = @[
+    newRacoon(self.assetLoader.newSprite(racoonAsset), self.player.Entity),
+  ]
+  var racoonPos = 3400
+  racoons[0].sprite.position = vec2(racoonPos, 600)
+  self.entities.add(Entity(racoons[0]))
+  racoonPos += 50
+
+  tickPos = 4500
+  ticka = newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity)
+  ticka.sprite.position = vec2(tickPos, 300)
+  self.entities.add(ticka)
+  
+
+    
   let arB1: Boundary = (left: cint(600), right: cint(1880), top: cint(-1), bottom: cint(-1))
   let arena1 = newArena(arB1, self.font)
   self.arenas.add(arena1)
+
+  let arB2: Boundary = (left: cint(2300), right: cint(3580), top: cint(-1), bottom: cint(-1))
+  let arena2 = newArena(arB2, self.font)
+  self.arenas.add(arena2)
+
+  let arB3: Boundary = (left: cint(3400), right: cint(4680), top: cint(-1), bottom: cint(-1))
+  let arena3 = newArena(arB3, self.font)
+  self.arenas.add(arena3)  
 
   for entity in self.entities:
     if entity of Enemy:
@@ -371,6 +507,12 @@ proc getBoundary(self: Stage1): Boundary =
   return self.boundary
 
 proc update*(self: Stage1, window: RenderWindow) =
+  if self.currentStage == 2:
+    self.currentStage = 3
+    # skip lvel
+    self.loadSubway()
+
+  
   var lastPlayerCoords = self.player.sprite.position
   let dt = self.Scene.update(window)
 

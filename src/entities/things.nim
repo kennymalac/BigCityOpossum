@@ -5,7 +5,7 @@ import entity
 import ../assetLoader
 
 let trashBinImg = "trashcan-black.png"
-let trashBinImgBlue = "trashcan-black.png"
+let trashBinImgBlue = "trashcan-blue.png"
 let trashBinImgGreen = "trashcan-green.png"
 
 let trashImg1 = "trash1.png"

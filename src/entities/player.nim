@@ -50,6 +50,10 @@ proc newPlayer*(loader: AssetLoader): Player =
   result = Player(standTexture: standAsset.texture, playDeadTexture: playDeadAsset.texture, health: 100, stability: 100, strength: 5, speed: 3, triggeredAction: false, walking: false, playingDead: false, attackSpeed: initDuration(milliseconds=750), eatSpeed: initDuration(seconds=2), attackTimer: initDuration(seconds=0), eatTimer: initDuration(seconds=0), stabilityTimer: initDuration(seconds=0), stabilityLossSpeed: initDuration(seconds=1), playDeadTimer: initDuration(milliseconds=0))
   initEntity(result, sprite, 3)
 
+
+proc addStability(self: Player, stability: int) =
+  self.stability = min(self.stability + stability, 100)
+  
 proc addHealth(self: Player, health: int) =
   self.health = min(self.health + health, 100)
 
@@ -66,7 +70,7 @@ proc eatTrash*(self: Player, trash: Trash, dt: Duration) =
 
   if trash.health <= 0:
     trash.isDead = true
-    self.stability += 10
+    self.addStability(10)
     #trash.isEmpty = true
 
   # Reset timer
@@ -119,7 +123,7 @@ proc attack*(self: Player, enemy: Enemy, dt: Duration) =
   if enemy.health <= 0:
     echo(fmt"Killed Enemy")
     if enemy of Tick:
-      self.stability += 1
+      self.addStability(1)
     enemy.isDead = true
 
   # Reset timer
@@ -178,7 +182,7 @@ method update*(self: Player, dt: times.Duration) =
   ############
   self.stabilityTimer += dt
   if self.stabilityTimer >= self.stabilityLossSpeed:
-    if self.stability >= 40:
+    if self.stability >= 50:
       self.addHealth(1)
 
     if self.stability > 0:
