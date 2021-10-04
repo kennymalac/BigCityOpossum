@@ -54,7 +54,7 @@ proc load*(self: MainMenuScene, window: RenderWindow) =
   self.menuMusic.loop = true
   self.menuMusic.play()
   self.background = self.assetLoader.newSprite(
-     self.assetLoader.newImageAsset("menu-background_1-1.png")
+     self.assetLoader.newImageAsset("menu-background.png")
   )
   self.gameTitle = self.assetLoader.newSprite(
      self.assetLoader.newImageAsset("game-logo_1-1.png")
