@@ -1,9 +1,13 @@
+import random
 import times
+
+randomize()
 
 import csfml #, csfml/ext
 
 import entities/entity
 #import entities/enemy
+import entities/things
 import assetLoader
 
 type
@@ -13,12 +17,15 @@ type
     view*: View
     entities*: seq[Entity]
     assetLoader*: AssetLoader
-
+    
     origin: Vector2f
 
     # initialTimeNotSet: bool
     currentTime*: times.Time
     previousTime: times.Time
+
+    # TODO image registry...
+    trashAssets: seq[ImageAsset]
 
 proc initScene*(self: Scene, window: RenderWindow, title: string, origin: Vector2f) =
   self.title = title
@@ -29,6 +36,8 @@ proc initScene*(self: Scene, window: RenderWindow, title: string, origin: Vector
   self.assetLoader = newAssetLoader("assets")
   self.previousTime = getTime()
   self.currentTime = getTime()
+
+  self.trashAssets = self.assetLoader.getTrashAssets()
 
 proc newScene*(window: RenderWindow, title: string, origin: Vector2f): Scene =
   new result
@@ -57,10 +66,25 @@ proc update*(self: Scene, window: RenderWindow): Duration =
   self.currentTime = getTime()
   var dt = self.currentTime - self.previousTime
 
+  var addedEntities: seq[Entity] = @[]
+  
   for i, entity in self.entities:
     entity.update(dt)
     entity.updateRectPosition()
+    if entity of TrashBin:
+      if TrashBin(entity).spawningTrash:
+        let trash1 = newTrash(self.assetloader.newSprite(sample(self.trashAssets)))
+        trash1.sprite.position = vec2(entity.rect.left, entity.rect.top + entity.rect.height)
+        addedEntities.add(Entity(trash1))
+        let trash2 = newTrash(self.assetLoader.newSprite(sample(self.trashAssets)))
+        trash2.sprite.position = vec2(entity.rect.left + 60, entity.rect.top + entity.rect.height)
+        addedEntities.add(Entity(trash2))
+        # finished spawning
+        TrashBin(entity).spawningTrash = false
 
+  for e in addedEntities:
+    self.entities.add(e)
+        
   return dt
 
 proc draw*(self: Scene, window: RenderWindow) =

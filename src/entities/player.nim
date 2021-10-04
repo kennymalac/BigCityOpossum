@@ -26,7 +26,7 @@ type
     playingDead*: bool
     eating*: bool
     eatTarget*: Option[Trash]
-    attackTarget*: Option[Enemy]
+    attackTarget*: Option[Entity]
 
     triggeredAction*: bool
     # mouthHitbox: FloatRect
@@ -64,8 +64,9 @@ proc eatTrash*(self: Player, trash: Trash, dt: Duration) =
   trash.health -= self.strength
 
   if trash.health <= 0:
+    trash.isDead = true
+    self.stability += 5
     #trash.isEmpty = true
-    self.addHealth(5)
 
   # Reset timer
   self.eatTimer = initDuration(seconds=0)
@@ -79,6 +80,26 @@ proc playDead*(self: Player, dt: Duration) =
   self.sprite.setTexture(self.playDeadTexture, true)
   # TODO when timer reach duration, change back to standing
 
+proc attack*(self: Player, trashBin: TrashBin, dt: Duration) =
+  if trashBin.isEmpty:
+    self.attacking = false
+    return
+
+  # TODO use attack animation
+  trashBin.health -= self.strength
+  echo(fmt"Attacked trashBin for {self.strength} damage")
+  echo(fmt"TrashBin health: {trashBin.health}")
+
+  if trashBin.health <= 0:
+    echo(fmt"emptied TrashBin")
+    trashBin.isEmpty = true
+    trashBin.spawningTrash = true
+
+  # Reset timer
+  self.attackTimer = initDuration(seconds=0)
+  if not self.triggeredAction:
+    self.attacking = false
+  
 proc attack*(self: Player, enemy: Enemy, dt: Duration) =
   if enemy.isDead:
     self.attacking = false
@@ -100,19 +121,33 @@ proc attack*(self: Player, enemy: Enemy, dt: Duration) =
 
 proc triggerAction*(self: Player, entities: seq[Entity], dt: Duration) =
   var attacking: seq[Entity] = @[]
+  var attackingBins: seq[Entity] = @[]
   var eating: seq[Entity] = @[]
 
   for entity in entities:
     if entity of Enemy:
       if self.intersects(entity):
         attacking.add(entity)
+
+    elif entity of TrashBin:
+      if self.intersects(entity) and not TrashBin(entity).isEmpty:
+        attackingBins.add(entity)
+    
     elif entity of Trash:
       if self.intersects(entity):
+        echo("trash intersects")
         eating.add(entity)
 
   # NOTE: Attacking has precedence over eating
-  if len(attacking) > 0:
-    self.attackTarget = getNearest[Enemy](self.Entity, attacking)
+  if len(attackingBins) > 0:
+    self.attackTarget = some(Entity(getNearest[TrashBin](self.Entity, attackingBins).get()))
+    
+    self.attacking = true
+    self.eating = false
+        
+  elif len(attacking) > 0:
+    self.attackTarget = some(Entity(getNearest[Enemy](self.Entity, attacking).get()))
+    
     self.attacking = true
     self.eating = false
 
@@ -130,8 +165,14 @@ method update*(self: Player, dt: times.Duration) =
   if self.playingDead:
     self.playDead(dt)
 
+  ############
+  # Stability
+  ############
   self.stabilityTimer += dt
   if self.stabilityTimer >= self.stabilityLossSpeed:
+    if self.stability >= 40:
+      self.addHealth(1)
+
     if self.stability > 0:
       self.stability -= 1
     else:
@@ -139,10 +180,18 @@ method update*(self: Player, dt: times.Duration) =
       self.minusHealth(1)
     self.stabilityTimer = initDuration(seconds=0)
 
+  ############
+  # Attacking
+  ############
   if self.attacking:
     self.attackTimer += dt
     if self.attackTimer >= self.attackSpeed:
-      self.attack(self.attackTarget.get(), dt)
+      let target = self.attackTarget.get()
+
+      if target of TrashBin:
+        self.attack(TrashBin(target), dt)
+      elif target of Enemy:
+        self.attack(Enemy(target), dt)
 
   if self.eating:
     self.eatTimer += dt

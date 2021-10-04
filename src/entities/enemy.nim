@@ -6,7 +6,7 @@ import entity
 import ../assetLoader
 import ../vector_utils
 
-let ratImg = "opossum1.png"
+let ratImg = "rat1.png"
 
 type
   Enemy* = ref object of Entity
@@ -29,7 +29,7 @@ proc getRatAssets*(loader: AssetLoader): ImageAsset =
   return loader.newImageAsset(ratImg)
 
 proc newRat*(sprite: Sprite, player: Entity): Rat =
-  result = Rat(player: player, health: 10, strength: 1, speed: 4, direction: vec2(0.0, 0.0), directionLag: initDuration(seconds = 1), directionTimer: initDuration(seconds = 0), walking: false, aggression: false, attacking: false, attackTimer: initDuration(seconds = 0), attackSpeed: initDuration(seconds=1))
+  result = Rat(player: player, health: 10, strength: 2, speed: 4, direction: vec2(0.0, 0.0), directionLag: initDuration(seconds = 1), directionTimer: initDuration(seconds = 0), walking: false, aggression: false, attacking: false, attackTimer: initDuration(seconds = 0), attackSpeed: initDuration(seconds=1))
   initEntity(result, sprite)
 
 proc attack*(self: Enemy) =

@@ -6,6 +6,9 @@ import os
 import random
 import math
 
+randomize()
+
+
 import csfml, csfml/audio
 
 import ../scene
@@ -80,13 +83,18 @@ proc load*(self: Stage1) =
 
   self.entities.add(Entity(self.player))
 
-  let binAsset = self.assetLoader.getTrashAsset(TrashBin)
+  let binAssets = self.assetLoader.getTrashBinAssets()
   let trashBins = @[
-    newTrash(self.assetLoader.newSprite(binAsset), TrashBin),
-    newTrash(self.assetLoader.newSprite(binAsset), TrashBin),
-    newTrash(self.assetLoader.newSprite(binAsset), TrashBin)
+    newTrashBin(self.assetLoader.newSprite(binAssets[0])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[0])),
+    newTrashBin(self.assetLoader.newSprite(binAssets[0]))
   ]
-
+  var trashPos = 450
+  for t in trashBins:
+    t.sprite.position = vec2(trashPos, 300)
+    self.entities.add(Entity(t))
+    trashPos += 400
+  
   let ratAsset = self.assetLoader.getRatAssets()
   var rats: seq[Rat] = @[
 #    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
@@ -138,12 +146,6 @@ proc load*(self: Stage1) =
       elif arena3.withinBounds(entity.sprite.position):
         arena3.addEnemy(Enemy(entity))
     
-  var trashPos = 450
-  for trash in trashBins:
-    trash.sprite.position = vec2(trashPos, 300)
-    self.entities.add(Entity(trash))
-    trashPos += 400
-
 
 method handleEvent*(self: Stage1, window: RenderWindow, event: Event) =
   case event.kind
