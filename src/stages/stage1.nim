@@ -228,6 +228,7 @@ proc resetStage*(self: Stage1) =
   self.view = newView(getOrigin(self.windowSize), self.windowSize)
 
   self.currentArena = Arena(active: false, done: false)
+  self.currentArenaIdx = -1
   self.sidescrolling = true
 
 proc loadSubway*(self: Stage1, window: RenderWindow) =
