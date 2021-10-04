@@ -23,7 +23,6 @@ type
     strength*: int
     walking*: bool
     attacking*: bool
-    playingDead*: bool
     eating*: bool
     eatTarget*: Option[Trash]
     attackTarget*: Option[Entity]
@@ -46,7 +45,7 @@ proc newPlayer*(loader: AssetLoader): Player =
   let playDeadAsset = loader.newImageAsset(opossumPlayDeadImg)
   let sprite = loader.newSprite(standAsset)
 
-  result = Player(standTexture: standAsset.texture, playDeadTexture: playDeadAsset.texture, health: 100, stability: 500, strength: 50, speed: 13, triggeredAction: false, walking: false, playingDead: false, attackSpeed: initDuration(seconds=1), eatSpeed: initDuration(seconds=2), attackTimer: initDuration(seconds=0), eatTimer: initDuration(seconds=0), stabilityTimer: initDuration(seconds=0), stabilityLossSpeed: initDuration(seconds=1))
+  result = Player(standTexture: standAsset.texture, playDeadTexture: playDeadAsset.texture, health: 100, stability: 500, strength: 50, speed: 13, triggeredAction: false, walking: false, playingDead: false, attackSpeed: initDuration(milliseconds=750), eatSpeed: initDuration(seconds=2), attackTimer: initDuration(seconds=0), eatTimer: initDuration(seconds=0), stabilityTimer: initDuration(seconds=0), stabilityLossSpeed: initDuration(seconds=1))
   initEntity(result, sprite)
 
 proc addHealth(self: Player, health: int) =
@@ -76,6 +75,7 @@ proc eatTrash*(self: Player, trash: Trash, dt: Duration) =
 proc playDead*(self: Player, dt: Duration) =
   self.attacking = false
   self.walking = false
+  self.stability -= 1
   # if timer is 0
   self.sprite.setTexture(self.playDeadTexture, true)
   # TODO when timer reach duration, change back to standing
@@ -112,6 +112,8 @@ proc attack*(self: Player, enemy: Enemy, dt: Duration) =
 
   if enemy.health <= 0:
     echo(fmt"Killed Enemy")
+    if enemy of Tick:
+      self.stability += 1
     enemy.isDead = true
 
   # Reset timer
@@ -251,6 +253,9 @@ proc handleActionEvents*(self: Player, event: Event) =
     else: discard
   of EventType.KeyReleased:
     case event.key.code:
+    of KeyCode.X:
+      self.playingDead = false
+      self.sprite.setTexture(self.standTexture, true)
     of KeyCode.Space:
       self.triggeredAction = false
     else: discard

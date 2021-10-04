@@ -17,6 +17,9 @@ type
     interRect*: FloatRect
     rectdivisor: cfloat
 
+    # hack
+    playingDead*: bool
+
 proc initEntity*(self: Entity, sprite: Sprite, rectpadding: int = 5, rectdivisor: cfloat = 2) =
   self.sprite = sprite
   self.sprite.origin = vec2(cfloat(floor(sprite.scaledSize.x / 2)), cfloat(floor(sprite.scaledSize.y / 2)))

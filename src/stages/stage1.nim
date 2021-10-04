@@ -102,27 +102,54 @@ proc load*(self: Stage1) =
     self.entities.add(Entity(t))
     trashPos += 400
 
+  # progression goes:
+    # 4 ticks
+    # 4 ticks + 2 rats
+    # 8 ticks + 3 rats
+    # ???
+    
+  let tickAsset = self.assetLoader.getTickAssets()
+  var ticks: seq[Tick] = @[
+#    newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity),
+    newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity),
+    newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity),
+    newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity)
+  ]
+  var tickPos = 1200
+  for tick in ticks:
+    tick.sprite.position = vec2(tickPos, 600)
+    self.entities.add(Entity(tick))
+    tickPos += 50
+
+  var ticka = newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity)
+  ticka.sprite.position = vec2(tickPos, 300)
+  self.entities.add(ticka)
+
   let ratAsset = self.assetLoader.getRatAssets()
   var rats: seq[Rat] = @[
 #    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
     newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
     newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity)
   ]
-  var ratPos = 1200
+  var ratPos = 2800
   for rat in rats:
     rat.sprite.position = vec2(ratPos, 600)
     self.entities.add(Entity(rat))
     ratPos += 150
 
-  rats = @[
-    newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
-  ]
-  ratPos = 2600
-  for rat in rats:
-    rat.sprite.position = vec2(ratPos, 750)
-    self.entities.add(Entity(rat))
-    ratPos += 200
 
+  ticks = @[
+    newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity),
+    newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity),
+    newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity),
+    newTick(self.assetLoader.newSprite(tickAsset), self.player.Entity)
+  ]
+  tickPos = 4200
+  for tick in ticks:
+    tick.sprite.position = vec2(tickPos, 750)
+    self.entities.add(Entity(tick))
+    tickPos += 200
+    
   rats = @[
     newRat(self.assetLoader.newSprite(ratAsset), self.player.Entity),
   ]
@@ -131,7 +158,7 @@ proc load*(self: Stage1) =
     rat.sprite.position = vec2(ratPos, 750)
     self.entities.add(Entity(rat))
     ratPos += 200
-
+    
   let arB1: Boundary = (left: cint(600), right: cint(1880), top: cint(-1), bottom: cint(-1))
   let arena1 = newArena(arB1, self.font)
   self.arenas.add(arena1)
@@ -182,7 +209,12 @@ proc loadSubway*(self: Stage1) =
   self.background.scale = vec2(1, 1)
   self.background.position = vec2(0, 0)
 
-
+  # progression goes:
+    # 8 ticks + 4 rats
+    # 4 ticks + 6 rats + 1 racoon
+    # 4 ticks + 8 rats + 2 racoons
+    # ???
+  
   let binAssets = self.assetLoader.getTrashBinAssets()
   let trashBins = @[
     newTrashBin(self.assetLoader.newSprite(binAssets[0])),
@@ -234,6 +266,12 @@ proc loadCentralPark*(self: Stage1) =
   self.background.position = vec2(0, 0)
 
 
+  # progression goes:
+    # 8 rats
+    # 4 ticks + 4 rats + 3 racoons
+    # 1 dog
+    # ???
+  
   let binAssets = self.assetLoader.getTrashBinAssets()
   let trashBins = @[
     newTrashBin(self.assetLoader.newSprite(binAssets[0])),
