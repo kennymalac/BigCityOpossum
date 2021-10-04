@@ -481,5 +481,5 @@ proc draw*(self: Stage1, window: RenderWindow) =
   if self.isGameOver:
     let gameOverText = newText("GAME OVER", self.font)
     gameOverText.characterSize = 72
-    gameOverText.position = vec2(window.size.x/2 - cfloat(gameOverText.globalBounds.width/2), window.size.y/2 - cfloat(gameOverText.globalBounds.height/2))
+    gameOverText.position = vec2(self.view.center.x - cfloat(gameOverText.globalBounds.width/2), self.view.center.y - cfloat(gameOverText.globalBounds.height/2))
     window.draw(gameOverText)
